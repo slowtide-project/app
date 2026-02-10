@@ -14,7 +14,8 @@ export const AppState = {
     elapsedSaved: 0,
     entities: [],
     lastInteraction: Date.now(),
-    lastSFX: 0
+    lastSFX: 0,
+    timerInterval: null
 };
 
 /** Audio system state variables */
@@ -24,8 +25,7 @@ export const AudioState = {
     waveLFO: null,
     noiseSource: null,
     activeSynth: null,
-    activeSynthGain: null,
-    timerInterval: null
+    activeSynthGain: null
 };
 
 /** Cached DOM element references */

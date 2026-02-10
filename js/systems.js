@@ -1,4 +1,4 @@
-import { AppState, AudioState, DOM } from './state.js';
+import { AppState, DOM } from './state.js';
 import { CONFIG, VIEWS } from './config.js';
 import { ContinuousSynth } from './audio.js';
 import { Particles } from './views/particles.js';
@@ -14,13 +14,13 @@ export const Timer = {
      * @param {boolean} reset - Whether to reset elapsed time
      */
     start(reset = true) {
-        if (AudioState.timerInterval) clearInterval(AudioState.timerInterval);
+        if (AppState.timerInterval) clearInterval(AppState.timerInterval);
         if (reset) { 
             AppState.startTime = Date.now(); 
             AppState.elapsedSaved = 0; 
         }
         this.updateDisplay();
-        AudioState.timerInterval = setInterval(() => { 
+        AppState.timerInterval = setInterval(() => { 
             this.updateDisplay(); 
             this.checkSunset(); 
             IdleManager.checkIdle(); 
@@ -31,7 +31,7 @@ export const Timer = {
      * Pause the timer and audio
      */
     pause() {
-        clearInterval(AudioState.timerInterval);
+        clearInterval(AppState.timerInterval);
         AppState.elapsedSaved += Date.now() - AppState.startTime;
         if (AudioState.context) AudioState.context.suspend();
         DOM.pauseBtn.innerText = "Resume Session";
@@ -93,6 +93,36 @@ export const Timer = {
     }
 };
 
+/** Ghost interaction handler mapping by view type */
+const GhostInteractionHandlers = {
+    [VIEWS.PARTICLES]: () => {
+        const cx = Math.random() * DOM.canvas.width;
+        const cy = Math.random() * DOM.canvas.height;
+        Particles.spawn(cx, cy);
+    },
+    [VIEWS.BUBBLES]: () => Bubbles.spawn(),
+    [VIEWS.LIQUID]: () => {
+        const cx = Math.random() * DOM.canvas.width;
+        const cy = Math.random() * DOM.canvas.height;
+        Liquid.spawn(cx, cy);
+    },
+    [VIEWS.SORTING]: () => {
+        if (AppState.entities.length > 0) {
+            const s = AppState.entities[Math.floor(Math.random() * AppState.entities.length)];
+            s.dx += (Math.random() - 0.5) * CONFIG.GHOST_IMPULSE_SORTING;
+            s.dy += (Math.random() - 0.5) * CONFIG.GHOST_IMPULSE_SORTING;
+            s.vAngle += (Math.random() - 0.5) * CONFIG.GHOST_ANGLE_IMPULSE;
+        }
+    },
+    [VIEWS.MARBLES]: () => {
+        if (AppState.entities.length > 0) {
+            const m = AppState.entities[Math.floor(Math.random() * AppState.entities.length)];
+            m.vx += (Math.random() - 0.5) * CONFIG.GHOST_IMPULSE_MARBLES;
+            m.vy += (Math.random() - 0.5) * CONFIG.GHOST_IMPULSE_MARBLES;
+        }
+    }
+};
+
 /** System for handling user inactivity */
 export const IdleManager = {
     /**
@@ -126,24 +156,16 @@ export const IdleManager = {
      * Trigger simulated interaction for engagement
      */
     ghostInteraction() {
-        let cx = Math.random() * DOM.canvas.width;
-        let cy = Math.random() * DOM.canvas.height;
-        
-        if (AppState.currentView === VIEWS.PARTICLES) Particles.spawn(cx, cy);
-        if (AppState.currentView === VIEWS.BUBBLES) Bubbles.spawn();
-        if (AppState.currentView === VIEWS.LIQUID) Liquid.spawn(cx, cy);
-        if (AppState.currentView === VIEWS.SORTING && AppState.entities.length > 0) {
-            let s = AppState.entities[Math.floor(Math.random() * AppState.entities.length)];
-            s.dx += (Math.random() - 0.5) * 50; 
-            s.dy += (Math.random() - 0.5) * 50; 
-            s.vAngle += (Math.random() - 0.5) * 0.1;
-        }
-        if (AppState.currentView === VIEWS.MARBLES && AppState.entities.length > 0) {
-            let m = AppState.entities[Math.floor(Math.random() * AppState.entities.length)];
-            m.vx += (Math.random() - 0.5) * 15; 
-            m.vy += (Math.random() - 0.5) * 15;
-        }
+        const handler = GhostInteractionHandlers[AppState.currentView];
+        if (handler) handler();
     }
+};
+
+/** View initialization handler mapping */
+const ViewInitHandlers = {
+    [VIEWS.SORTING]: () => Sorting.init(),
+    [VIEWS.BUBBLES]: () => Bubbles.init(),
+    [VIEWS.MARBLES]: () => Marbles.init()
 };
 
 /** View switching and management */
@@ -159,8 +181,7 @@ export const ViewManager = {
         if (btn) btn.classList.add('active');
         AppState.entities = [];
         
-        if (viewName === VIEWS.SORTING) Sorting.init();
-        if (viewName === VIEWS.BUBBLES) Bubbles.init();
-        if (viewName === VIEWS.MARBLES) Marbles.init();
+        const initHandler = ViewInitHandlers[viewName];
+        if (initHandler) initHandler();
     }
 };

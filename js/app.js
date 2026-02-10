@@ -120,7 +120,7 @@ function resetApp() {
     DOM.confirmModal.style.display = 'none';
     if (AudioState.context) AudioState.context.suspend();
     if (AudioState.noiseSource) try { AudioState.noiseSource.stop(); } catch (e) { }
-    clearInterval(AudioState.timerInterval);
+    clearInterval(AppState.timerInterval);
     AppState.isSessionRunning = false; 
     AppState.isPaused = false; 
     AppState.elapsedSaved = 0;

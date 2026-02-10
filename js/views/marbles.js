@@ -48,13 +48,13 @@ export const Marbles = {
             if (m.x < m.r || m.x > DOM.canvas.width - m.r) { 
                 m.vx *= -CONFIG.MARBLE_BOUNCE_DAMPING; SFX.play('clack'); 
             }
-            if (m.y < m.r + 80 || m.y > DOM.canvas.height - m.r) { 
+            if (m.y < m.r + CONFIG.HEADER_HEIGHT || m.y > DOM.canvas.height - m.r) { 
                 m.vy *= -CONFIG.MARBLE_BOUNCE_DAMPING; SFX.play('clack'); 
             }
 
             if (m.x < m.r) m.x = m.r; 
             if (m.x > DOM.canvas.width - m.r) m.x = DOM.canvas.width - m.r;
-            if (m.y < m.r + 80) m.y = m.r + 80; 
+            if (m.y < m.r + CONFIG.HEADER_HEIGHT) m.y = m.r + CONFIG.HEADER_HEIGHT; 
             if (m.y > DOM.canvas.height - m.r) m.y = DOM.canvas.height - m.r;
 
             for (let j = i + 1; j < AppState.entities.length; j++) {
@@ -62,7 +62,7 @@ export const Marbles = {
                     d = Math.sqrt(dx * dx + dy * dy), minD = m.r + m2.r;
                 if (d < minD) {
                     let a = Math.atan2(dy, dx), tx = m.x + Math.cos(a) * minD, ty = m.y + Math.sin(a) * minD;
-                    let ax = (tx - m2.x) * 0.05, ay = (ty - m2.y) * 0.05; 
+                    let ax = (tx - m2.x) * CONFIG.MARBLE_COLLISION_RESOLUTION, ay = (ty - m2.y) * CONFIG.MARBLE_COLLISION_RESOLUTION; 
                     m.vx -= ax; m.vy -= ay; m2.vx += ax; m2.vy += ay;
                     SFX.play('clack');
                 }

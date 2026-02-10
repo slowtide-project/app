@@ -11,14 +11,13 @@ export const Sorting = {
      * Initialize sorting blocks
      */
     init() {
-        const colors = ['#5D6D7E', '#A9DFBF', '#F5B7B1', '#D7BDE2', '#F9E79F'];
         for (let i = 0; i < CONFIG.SORTING_BLOCK_COUNT; i++) {
             AppState.entities.push({
                 x: Math.random() * (DOM.canvas.width - 100) + 50,
                 y: Math.random() * (DOM.canvas.height - 200) + 100,
                 w: Math.random() * 60 + 40,
                 h: Math.random() * 40 + 30,
-                c: colors[Math.floor(Math.random() * colors.length)],
+                c: CONFIG.SORTING_COLORS[Math.floor(Math.random() * CONFIG.SORTING_COLORS.length)],
                 angle: Math.random() * Math.PI,
                 vAngle: (Math.random() - 0.5) * 0.02,
                 dx: Math.random() * 100,
@@ -57,7 +56,7 @@ export const Sorting = {
     handleMove(x, y) {
         if (this.dragBlock) { 
             let speedX = x - this.dragBlock.prevX; 
-            this.dragBlock.vAngle = speedX * 0.005; 
+            this.dragBlock.vAngle = speedX * CONFIG.SORTING_ANGULAR_VELOCITY_FACTOR; 
             this.dragBlock.prevX = x; 
             this.dragBlock.x = x - this.offsetX; 
             this.dragBlock.y = y - this.offsetY; 
@@ -78,11 +77,11 @@ export const Sorting = {
         
         AppState.entities.forEach(s => {
             if (s.targetX !== null) { 
-                s.x += (s.targetX - s.x) * 0.05; 
-                s.y += (s.targetY - s.y) * 0.05; 
-                if (Math.abs(s.x - s.targetX) < 5) s.targetX = null; 
+                s.x += (s.targetX - s.x) * CONFIG.SORTING_LERP_FACTOR; 
+                s.y += (s.targetY - s.y) * CONFIG.SORTING_LERP_FACTOR; 
+                if (Math.abs(s.x - s.targetX) < CONFIG.SORTING_MIN_DISTANCE) s.targetX = null; 
             }
-            if (s.y < 100 && this.dragBlock !== s) { s.y += 1; }
+            if (s.y < CONFIG.HEADER_HEIGHT + 20 && this.dragBlock !== s) { s.y += 1; }
             s.angle += s.vAngle; s.vAngle *= CONFIG.SORTING_DAMPING;
             
             let fx = s.x, fy = s.y;
