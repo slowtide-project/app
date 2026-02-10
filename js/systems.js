@@ -1,11 +1,11 @@
 import { AppState, AudioState, DOM } from './state.js';
 import { CONFIG, VIEWS } from './config.js';
 import { ContinuousSynth } from './audio.js';
-import { Particles } from './particles.js';
-import { Bubbles } from './bubbles.js';
-import { Liquid } from './liquid.js';
-import { Sorting } from './sorting.js';
-import { Marbles } from './marbles.js';
+import { Particles } from './views/particles.js';
+import { Bubbles } from './views/bubbles.js';
+import { Liquid } from './views/liquid.js';
+import { Sorting } from './views/sorting.js';
+import { Marbles } from './views/marbles.js';
 
 /** Session timer management */
 export const Timer = {

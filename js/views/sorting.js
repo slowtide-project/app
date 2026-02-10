@@ -1,9 +1,7 @@
-import { AppState, DOM } from './state.js';
-import { CONFIG, VIEWS } from './config.js';
-import { ContinuousSynth } from './audio.js';
-
-// Utility functions
-function pulse(ms) { if (navigator.vibrate) navigator.vibrate(ms); }
+import { AppState, DOM } from '../state.js';
+import { CONFIG, VIEWS } from '../config.js';
+import { ContinuousSynth } from '../audio.js';
+import { pulse } from '../utils.js';
 
 // 2. SORTING VIEW
 export const Sorting = {
@@ -46,7 +44,7 @@ export const Sorting = {
                 AppState.entities.splice(i, 1); 
                 AppState.entities.push(this.dragBlock);
                 s.targetX = null; s.prevX = x;
-                pulse(10);
+                pulse(CONFIG.HAPTIC_FEEDBACK_DURATION);
                 ContinuousSynth.start(VIEWS.SORTING, 0.5);
                 break;
             }
@@ -85,12 +83,12 @@ export const Sorting = {
                 if (Math.abs(s.x - s.targetX) < 5) s.targetX = null; 
             }
             if (s.y < 100 && this.dragBlock !== s) { s.y += 1; }
-            s.angle += s.vAngle; s.vAngle *= 0.95;
+            s.angle += s.vAngle; s.vAngle *= CONFIG.SORTING_DAMPING;
             
             let fx = s.x, fy = s.y;
             if (this.dragBlock !== s) { 
-                fx += Math.sin(Date.now() * 0.001 + s.dx) * 2; 
-                fy += Math.cos(Date.now() * 0.001 + s.dy) * 2; 
+                fx += Math.sin(Date.now() * 0.001 + s.dx) * CONFIG.SORTING_FLOAT_AMPLITUDE; 
+                fy += Math.cos(Date.now() * 0.001 + s.dy) * CONFIG.SORTING_FLOAT_AMPLITUDE; 
                 s.scale += (1.0 - s.scale) * 0.2; 
             } else { 
                 s.scale += (1.2 - s.scale) * 0.2; 

@@ -7,11 +7,11 @@ import { AppState, AudioState, DOM, initDOM } from './state.js';
 import { AudioEngine, ContinuousSynth, SFX } from './audio.js';
 import { savePreferences, loadPreferences } from './storage.js';
 import { Timer, IdleManager, ViewManager } from './systems.js';
-import { Particles } from './particles.js';
-import { Sorting } from './sorting.js';
-import { Bubbles } from './bubbles.js';
-import { Liquid } from './liquid.js';
-import { Marbles } from './marbles.js';
+import { Particles } from './views/particles.js';
+import { Sorting } from './views/sorting.js';
+import { Bubbles } from './views/bubbles.js';
+import { Liquid } from './views/liquid.js';
+import { Marbles } from './views/marbles.js';
 import { initAdminMode, toggleAdminOverlay, adminForceSunset } from './admin.js';
 
 // =========================================================================
@@ -136,6 +136,30 @@ function resetApp() {
 // INPUT HANDLING SYSTEM
 // =========================================================================
 
+/** View handler mapping for input dispatch */
+const ViewInputHandlers = {
+    [VIEWS.PARTICLES]: {
+        start: (x, y, yRatio) => { Particles.spawn(x, y); ContinuousSynth.start(VIEWS.PARTICLES, yRatio); },
+        move: (x, y) => Particles.spawn(x, y)
+    },
+    [VIEWS.SORTING]: {
+        start: (x, y) => Sorting.handleStart(x, y),
+        move: (x, y) => Sorting.handleMove(x, y),
+        end: () => Sorting.handleEnd()
+    },
+    [VIEWS.BUBBLES]: {
+        start: (x, y) => Bubbles.handleStart(x, y)
+    },
+    [VIEWS.LIQUID]: {
+        start: (x, y, yRatio) => { Liquid.spawn(x, y); ContinuousSynth.start(VIEWS.LIQUID, yRatio); },
+        move: (x, y) => Liquid.spawn(x, y)
+    },
+    [VIEWS.MARBLES]: {
+        start: (x, y) => Marbles.handleInput(x, y),
+        move: (x, y) => Marbles.handleInput(x, y)
+    }
+};
+
 /** System for managing user input */
 const InputManager = {
     /**
@@ -160,7 +184,8 @@ const InputManager = {
     handleInput(e, type) {
         if (type === 'end') {
             ContinuousSynth.stop();
-            if (AppState.currentView === VIEWS.SORTING) Sorting.handleEnd();
+            const handler = ViewInputHandlers[AppState.currentView];
+            if (handler?.end) handler.end();
             return;
         }
 
@@ -172,45 +197,8 @@ const InputManager = {
         AppState.lastInteraction = Date.now();
         const yRatio = y / DOM.canvas.height;
 
-        if (type === 'start') {
-            this.handleStart(x, y, yRatio);
-        } else if (type === 'move') {
-            this.handleMove(x, y, yRatio);
-        }
-    },
-
-    /**
-     * Handle input start (mouse down, touch start)
-     */
-    handleStart(x, y, yRatio) {
-        if (AppState.currentView === VIEWS.PARTICLES) { 
-            Particles.spawn(x, y); 
-            ContinuousSynth.start(VIEWS.PARTICLES, yRatio); 
-        }
-        if (AppState.currentView === VIEWS.SORTING) { 
-            Sorting.handleStart(x, y); 
-        }
-        if (AppState.currentView === VIEWS.BUBBLES) { 
-            Bubbles.handleStart(x, y); 
-        }
-        if (AppState.currentView === VIEWS.LIQUID) { 
-            Liquid.spawn(x, y); 
-            ContinuousSynth.start(VIEWS.LIQUID, yRatio); 
-        }
-        if (AppState.currentView === VIEWS.MARBLES) { 
-            Marbles.handleInput(x, y); 
-        }
-    },
-
-    /**
-     * Handle input move (mouse move, touch move)
-     */
-    handleMove(x, y, yRatio) {
-        ContinuousSynth.update(yRatio);
-        if (AppState.currentView === VIEWS.PARTICLES) Particles.spawn(x, y);
-        if (AppState.currentView === VIEWS.SORTING) Sorting.handleMove(x, y);
-        if (AppState.currentView === VIEWS.LIQUID) Liquid.spawn(x, y);
-        if (AppState.currentView === VIEWS.MARBLES) Marbles.handleInput(x, y);
+        const handler = ViewInputHandlers[AppState.currentView];
+        if (handler?.[type]) handler[type](x, y, yRatio);
     },
 
     /**
@@ -226,16 +214,22 @@ const InputManager = {
 // MAIN ANIMATION LOOP
 // =========================================================================
 
+/** View update mapping for animation dispatch */
+const ViewUpdateHandlers = {
+    [VIEWS.PARTICLES]: () => Particles.update(),
+    [VIEWS.SORTING]: () => Sorting.update(),
+    [VIEWS.BUBBLES]: () => Bubbles.update(),
+    [VIEWS.LIQUID]: () => Liquid.update(),
+    [VIEWS.MARBLES]: () => Marbles.update()
+};
+
 /**
  * Main render loop - updates current view
  */
 function animate() {
     if (AppState.isSessionRunning && !AppState.isPaused) {
-        if (AppState.currentView === VIEWS.PARTICLES) Particles.update();
-        if (AppState.currentView === VIEWS.SORTING) Sorting.update();
-        if (AppState.currentView === VIEWS.BUBBLES) Bubbles.update();
-        if (AppState.currentView === VIEWS.LIQUID) Liquid.update();
-        if (AppState.currentView === VIEWS.MARBLES) Marbles.update();
+        const updateHandler = ViewUpdateHandlers[AppState.currentView];
+        if (updateHandler) updateHandler();
     }
     requestAnimationFrame(animate);
 }

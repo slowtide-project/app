@@ -1,6 +1,6 @@
-import { AppState, DOM } from './state.js';
-import { CONFIG } from './config.js';
-import { SFX } from './audio.js';
+import { AppState, DOM } from '../state.js';
+import { CONFIG } from '../config.js';
+import { SFX } from '../audio.js';
 
 // 5. MARBLES VIEW
 export const Marbles = {
@@ -26,10 +26,10 @@ export const Marbles = {
     handleInput(x, y) {
         AppState.entities.forEach(m => {
             let dx = m.x - x, dy = m.y - y, d = Math.sqrt(dx * dx + dy * dy);
-            if (d < 200) { 
-                let f = (200 - d) / 200, a = Math.atan2(dy, dx); 
-                m.vx += Math.cos(a) * f * 2.5; 
-                m.vy += Math.sin(a) * f * 2.5; 
+            if (d < CONFIG.MARBLE_INTERACTION_RADIUS) { 
+                let f = (CONFIG.MARBLE_INTERACTION_RADIUS - d) / CONFIG.MARBLE_INTERACTION_RADIUS, a = Math.atan2(dy, dx); 
+                m.vx += Math.cos(a) * f * CONFIG.MARBLE_INTERACTION_FORCE; 
+                m.vy += Math.sin(a) * f * CONFIG.MARBLE_INTERACTION_FORCE; 
             }
         });
     },
@@ -43,13 +43,13 @@ export const Marbles = {
         
         for (let i = 0; i < AppState.entities.length; i++) {
             let m = AppState.entities[i]; 
-            m.x += m.vx; m.y += m.vy; m.vx *= 0.98; m.vy *= 0.98;
+            m.x += m.vx; m.y += m.vy; m.vx *= CONFIG.MARBLE_DAMPING; m.vy *= CONFIG.MARBLE_DAMPING;
 
             if (m.x < m.r || m.x > DOM.canvas.width - m.r) { 
-                m.vx *= -0.9; SFX.play('clack'); 
+                m.vx *= -CONFIG.MARBLE_BOUNCE_DAMPING; SFX.play('clack'); 
             }
             if (m.y < m.r + 80 || m.y > DOM.canvas.height - m.r) { 
-                m.vy *= -0.9; SFX.play('clack'); 
+                m.vy *= -CONFIG.MARBLE_BOUNCE_DAMPING; SFX.play('clack'); 
             }
 
             if (m.x < m.r) m.x = m.r; 

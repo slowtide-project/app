@@ -1,6 +1,7 @@
-import { AppState, DOM } from './state.js';
-import { CONFIG } from './config.js';
-import { SFX } from './audio.js';
+import { AppState, DOM } from '../state.js';
+import { CONFIG } from '../config.js';
+import { SFX } from '../audio.js';
+import { pulse } from '../utils.js';
 
 // 3. BUBBLES VIEW
 export const Bubbles = {
@@ -10,7 +11,7 @@ export const Bubbles = {
     init() {
         let maxB = Math.min(CONFIG.BUBBLE_MAX_COUNT, 
             Math.max(CONFIG.BUBBLE_MIN_COUNT, 
-            Math.floor((DOM.canvas.width * DOM.canvas.height) / 8000)));
+            Math.floor((DOM.canvas.width * DOM.canvas.height) / CONFIG.CANVAS_AREA_DIVISOR)));
         for (let i = 0; i < maxB; i++) {
             AppState.entities.push({
                 type: 'b', 
@@ -50,7 +51,7 @@ export const Bubbles = {
             if (b.type === 'b' && Math.sqrt((x - b.x) ** 2 + (y - b.y) ** 2) < b.s + 20) { 
                 this.createPop(b.x, b.y, b.c); 
                 AppState.entities.splice(i, 1); 
-                pulse(10); 
+                pulse(CONFIG.HAPTIC_FEEDBACK_DURATION); 
                 SFX.play('pop'); 
                 break;
             }
@@ -79,9 +80,9 @@ export const Bubbles = {
         DOM.ctx.clearRect(0, 0, DOM.canvas.width, DOM.canvas.height);
         let maxB = Math.min(CONFIG.BUBBLE_MAX_COUNT, 
             Math.max(CONFIG.BUBBLE_MIN_COUNT, 
-            Math.floor((DOM.canvas.width * DOM.canvas.height) / 8000)));
+            Math.floor((DOM.canvas.width * DOM.canvas.height) / CONFIG.CANVAS_AREA_DIVISOR)));
             
-        if (AppState.entities.filter(e => e.type === 'b').length < maxB && Math.random() < 0.05) {
+        if (AppState.entities.filter(e => e.type === 'b').length < maxB && Math.random() < CONFIG.BUBBLE_SPAWN_CHANCE) {
             this.spawn();
         }
         
@@ -98,12 +99,12 @@ export const Bubbles = {
                 DOM.ctx.strokeStyle = "rgba(255,255,255,0.4)"; 
                 DOM.ctx.lineWidth = 2; 
                 DOM.ctx.stroke();
-                if (e.y < -60) { AppState.entities.splice(i, 1); i--; }
+                if (e.y < -CONFIG.BUBBLE_DESPAWN_MARGIN) { AppState.entities.splice(i, 1); i--; }
             } else {
-                e.l -= 0.04; e.x += e.vx; e.y += e.vy;
+                e.l -= CONFIG.POP_PARTICLE_DECAY; e.x += e.vx; e.y += e.vy;
                 if (e.l <= 0) { AppState.entities.splice(i, 1); i--; continue; }
                 DOM.ctx.beginPath(); 
-                DOM.ctx.arc(e.x, e.y, 3, 0, Math.PI * 2); 
+                DOM.ctx.arc(e.x, e.y, CONFIG.POP_PARTICLE_SIZE, 0, Math.PI * 2); 
                 DOM.ctx.fillStyle = e.c; 
                 DOM.ctx.globalAlpha = e.l; 
                 DOM.ctx.fill(); 
@@ -112,6 +113,3 @@ export const Bubbles = {
         }
     }
 };
-
-// Utility function (moved from main file)
-function pulse(ms) { if (navigator.vibrate) navigator.vibrate(ms); }

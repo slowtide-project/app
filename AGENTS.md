@@ -12,14 +12,17 @@ This document outlines common development tasks and the recommended approach for
 
 **Agent**: General Purpose
 **Files to modify**:
-- Create `js/[new-view].js` (follow existing pattern)
+- Create `js/views/[new-view].js` (follow existing pattern)
 - Update `js/config.js` - add new view to `VIEWS` enum
-- Update `js/systems.js` - import new view
-- Update `js/app.js` - import new view
+- Update `js/systems.js` - import new view from `./views/[new-view].js`
+- Update `js/app.js` - import new view from `./views/[new-view].js`
 - Update `index.html` - add navigation button
 
 **Pattern to follow**:
 ```javascript
+import { AppState, DOM } from '../state.js';
+import { CONFIG } from '../config.js';
+
 export const NewView = {
     init() {
         // Initialize entities and setup
@@ -232,12 +235,33 @@ update() {
 4. Add proper imports/exports
 5. Test thoroughly after each step
 
+**Current directory structure**:
+```
+js/
+├── app.js          # Main application entry point
+├── config.js       # Configuration constants and enums
+├── state.js        # Global state management
+├── storage.js      # LocalStorage utilities
+├── audio.js        # Audio engine and sound effects
+├── systems.js      # Timer, idle manager, view manager
+├── admin.js        # Admin/debug overlay
+├── utils.js        # Shared utility functions
+└── views/          # Activity view modules
+    ├── particles.js
+    ├── bubbles.js
+    ├── sorting.js
+    ├── liquid.js
+    ├── marbles.js
+    └── [new views go here]
+```
+
 **Benefits of current structure**:
 - Easier code navigation
 - Better team collaboration
 - Cleaner git history
 - Reduced merge conflicts
 - Modern JavaScript practices
+- Scalable organization for adding new activities
 
 ---
 

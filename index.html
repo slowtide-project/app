@@ -27,7 +27,7 @@
             <div id="timer-display">Not Started</div>
             <button id="pause-btn" class="action-btn pause-btn" onclick="togglePause()">Pause Session</button>
 
-            <div class="setting-row" style="margin-top: 20px;">
+            <div class="setting-row mt-20">
                 <span class="setting-label">Update Duration</span>
                 <button class="opt-btn time-btn" data-time="15" onclick="changeDuration(15)">15m</button>
                 <button class="opt-btn time-btn" data-time="30" onclick="changeDuration(30)">30m</button>
@@ -60,23 +60,23 @@
         <div id="confirm-modal" class="modal-overlay">
             <h2>End Session?</h2>
             <p>This will stop the audio and return to the Start Screen.</p>
-            <div style="display:flex; gap:10px; margin-top:20px;">
-                <button class="action-btn close-btn" style="flex:1; margin-top:0; margin-bottom:0;"
+            <div class="flex-row">
+                <button class="action-btn close-btn flex-1 mt-0 mb-0"
                     onclick="closeQuitConfirm()">Cancel</button>
-                <button class="action-btn quit-btn" style="flex:1; margin-top:0;" onclick="resetApp()">End
+                <button class="action-btn quit-btn flex-1 mt-0" onclick="resetApp()">End
                     Session</button>
             </div>
         </div>
 
         <div id="update-modal" class="modal-overlay">
             <h2>Check for Updates?</h2>
-            <p style="color: #e67e22;"><strong>Internet Connection Required</strong></p>
+            <p class="warning-text"><strong>Internet Connection Required</strong></p>
             <p>This will reload the app from the server to check for the latest version. Any current settings will be
                 reset.</p>
-            <div style="display:flex; gap:10px; margin-top:20px;">
-                <button class="action-btn close-btn" style="flex:1; margin-top:0; margin-bottom:0;"
+            <div class="flex-row">
+                <button class="action-btn close-btn flex-1 mt-0 mb-0"
                     onclick="document.getElementById('update-modal').style.display='none'">Cancel</button>
-                <button class="action-btn update-confirm-btn" style="flex:1; margin-top:0;"
+                <button class="action-btn update-confirm-btn flex-1 mt-0"
                     onclick="performUpdate()">Update Now</button>
             </div>
         </div>
@@ -88,7 +88,7 @@
             <p><strong>3. Sunset Timer:</strong> The screen dims and audio fades out automatically.</p>
             <p><strong>4. Tips:</strong> Use "Guided Access" (iOS) or "App Pinning" (Android) to lock your child inside
                 the app.</p>
-            <button class="action-btn close-btn" style="margin-top: 20px;"
+            <button class="action-btn close-btn mt-20"
                 onclick="document.getElementById('instructions-modal').style.display='none'">Got it</button>
         </div>
 
@@ -122,7 +122,7 @@
                         d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
                 </svg></div>
             <div id="info-btn" onclick="document.getElementById('instructions-modal').style.display='block'">?</div>
-            <h1 style="font-weight: 300; color: #aaa; font-size: 24px; letter-spacing: 3px; margin-bottom: 20px;">SLOWTIDE</h1>
+            <h1 class="app-logo">SLOWTIDE</h1>
             <div class="picker-section">
                 <p class="picker-label">Duration</p>
                 <div class="start-opt-row">
@@ -152,7 +152,7 @@
             <div id="begin-btn">BEGIN SESSION</div>
         </div>
 
-        <div id="nav-bar" style="display:none; opacity: 0; transition: opacity 2s;">
+        <div id="nav-bar">
             <div class="nav-btn active" id="btn-particles" onclick="switchView('particles')"
                 ontouchstart="switchView('particles')"><svg viewBox="0 0 24 24">
                     <path

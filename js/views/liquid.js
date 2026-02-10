@@ -1,4 +1,5 @@
-import { DOM } from './state.js';
+import { DOM } from '../state.js';
+import { CONFIG } from '../config.js';
 
 // 4. LIQUID VIEW
 export const Liquid = {
@@ -19,7 +20,7 @@ export const Liquid = {
      * Update liquid animation
      */
     update() {
-        DOM.ctx.fillStyle = 'rgba(5,5,5,0.08)'; 
+        DOM.ctx.fillStyle = `rgba(5,5,5,${CONFIG.LIQUID_FADE_ALPHA})`; 
         DOM.ctx.fillRect(0, 0, DOM.canvas.width, DOM.canvas.height);
         let t = Date.now() * 0.002; 
         this.spawn(DOM.canvas.width / 2 + Math.sin(t) * (DOM.canvas.width / 3), 
