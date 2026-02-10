@@ -5,6 +5,7 @@
 import { CONFIG, SOUND_TYPES, VIEWS } from './config.js';
 import { AppState, AudioState, DOM, initDOM } from './state.js';
 import { AudioEngine, ContinuousSynth, SFX } from './audio.js';
+import { savePreferences, loadPreferences } from './storage.js';
 import { Timer, IdleManager, ViewManager } from './systems.js';
 import { Particles } from './particles.js';
 import { Sorting } from './sorting.js';
@@ -55,6 +56,10 @@ function changeDuration(mins) {
         if (b.getAttribute('data-time') == mins) b.classList.add('selected');
     });
     Timer.updateDisplay();
+    savePreferences({
+        duration: AppState.sessionMinutes,
+        sound: AppState.currentSound
+    });
 }
 
 /**
@@ -71,6 +76,10 @@ function changeSound(type) {
         if (AudioState.context.state === 'suspended') AudioState.context.resume();
         AudioEngine.generateSoundBuffer(type);
     }
+    savePreferences({
+        duration: AppState.sessionMinutes,
+        sound: AppState.currentSound
+    });
 }
 
 /**
@@ -246,6 +255,13 @@ function initApp() {
     initParentMenu();
     initAdminMode();
     InputManager.init();
+
+    // Load saved preferences or use defaults
+    const savedPrefs = loadPreferences();
+    const duration = savedPrefs?.duration ?? CONFIG.DEFAULT_SESSION_MINUTES;
+    const sound = savedPrefs?.sound ?? SOUND_TYPES.DEEP;
+    changeDuration(duration);
+    changeSound(sound);
 
     // Begin button click handler
     DOM.beginBtn.addEventListener('click', function () {
