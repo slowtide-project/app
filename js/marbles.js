@@ -1,0 +1,79 @@
+import { AppState, DOM } from './state.js';
+import { CONFIG } from './config.js';
+import { SFX } from './audio.js';
+
+// 5. MARBLES VIEW
+export const Marbles = {
+    /**
+     * Initialize marbles
+     */
+    init() {
+        for (let i = 0; i < CONFIG.MARBLE_COUNT; i++) {
+            AppState.entities.push({
+                x: Math.random() * DOM.canvas.width, 
+                y: Math.random() * DOM.canvas.height, 
+                vx: (Math.random() - .5) * 2, 
+                vy: (Math.random() - .5) * 2, 
+                r: Math.random() * 15 + 15, 
+                c: `hsl(${Math.random() * 360},60%,60%)`
+            });
+        }
+    },
+
+    /**
+     * Handle marble interaction
+     */
+    handleInput(x, y) {
+        AppState.entities.forEach(m => {
+            let dx = m.x - x, dy = m.y - y, d = Math.sqrt(dx * dx + dy * dy);
+            if (d < 200) { 
+                let f = (200 - d) / 200, a = Math.atan2(dy, dx); 
+                m.vx += Math.cos(a) * f * 2.5; 
+                m.vy += Math.sin(a) * f * 2.5; 
+            }
+        });
+    },
+
+    /**
+     * Update marble physics
+     */
+    update() {
+        DOM.ctx.fillStyle = 'rgba(5,5,5,0.3)'; 
+        DOM.ctx.fillRect(0, 0, DOM.canvas.width, DOM.canvas.height);
+        
+        for (let i = 0; i < AppState.entities.length; i++) {
+            let m = AppState.entities[i]; 
+            m.x += m.vx; m.y += m.vy; m.vx *= 0.98; m.vy *= 0.98;
+
+            if (m.x < m.r || m.x > DOM.canvas.width - m.r) { 
+                m.vx *= -0.9; SFX.play('clack'); 
+            }
+            if (m.y < m.r + 80 || m.y > DOM.canvas.height - m.r) { 
+                m.vy *= -0.9; SFX.play('clack'); 
+            }
+
+            if (m.x < m.r) m.x = m.r; 
+            if (m.x > DOM.canvas.width - m.r) m.x = DOM.canvas.width - m.r;
+            if (m.y < m.r + 80) m.y = m.r + 80; 
+            if (m.y > DOM.canvas.height - m.r) m.y = DOM.canvas.height - m.r;
+
+            for (let j = i + 1; j < AppState.entities.length; j++) {
+                let m2 = AppState.entities[j], dx = m2.x - m.x, dy = m2.y - m.y, 
+                    d = Math.sqrt(dx * dx + dy * dy), minD = m.r + m2.r;
+                if (d < minD) {
+                    let a = Math.atan2(dy, dx), tx = m.x + Math.cos(a) * minD, ty = m.y + Math.sin(a) * minD;
+                    let ax = (tx - m2.x) * 0.05, ay = (ty - m2.y) * 0.05; 
+                    m.vx -= ax; m.vy -= ay; m2.vx += ax; m2.vy += ay;
+                    SFX.play('clack');
+                }
+            }
+            DOM.ctx.beginPath(); 
+            DOM.ctx.arc(m.x, m.y, m.r, 0, Math.PI * 2); 
+            DOM.ctx.fillStyle = m.c; 
+            DOM.ctx.fill(); 
+            DOM.ctx.strokeStyle = "rgba(255,255,255,0.2)"; 
+            DOM.ctx.lineWidth = 2; 
+            DOM.ctx.stroke();
+        }
+    }
+};
