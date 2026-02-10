@@ -11,8 +11,7 @@ import { Sorting } from './sorting.js';
 import { Bubbles } from './bubbles.js';
 import { Liquid } from './liquid.js';
 import { Marbles } from './marbles.js';
-
-// No longer needed - modules are properly imported
+import { initAdminMode, toggleAdminOverlay, adminForceSunset } from './admin.js';
 
 // =========================================================================
 // PARENT MENU & SETTINGS
@@ -242,11 +241,12 @@ function animate() {
 function initApp() {
     // Initialize DOM references
     initDOM();
-    
+
     // Initialize event listeners
     initParentMenu();
+    initAdminMode();
     InputManager.init();
-    
+
     // Begin button click handler
     DOM.beginBtn.addEventListener('click', function () {
         DOM.startScreen.style.display = 'none';
@@ -276,6 +276,10 @@ window.showQuitConfirm = showQuitConfirm;
 window.closeQuitConfirm = closeQuitConfirm;
 window.resetApp = resetApp;
 window.performUpdate = performUpdate;
+
+// Admin mode functions
+window.toggleAdminOverlay = toggleAdminOverlay;
+window.adminForceSunset = adminForceSunset;
 
 // Start application when DOM is ready
 document.addEventListener('DOMContentLoaded', initApp);

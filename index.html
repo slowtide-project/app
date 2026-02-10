@@ -92,6 +92,29 @@
                 onclick="document.getElementById('instructions-modal').style.display='none'">Got it</button>
         </div>
 
+        <div id="admin-overlay">
+            <div class="admin-header">
+                <span>Admin Mode</span>
+                <button class="admin-close-btn" onclick="toggleAdminOverlay()">×</button>
+            </div>
+            <div class="admin-section">
+                <h3>Debug Info</h3>
+                <div id="admin-debug-info" class="admin-info">
+                    <p>Session: <span id="admin-session-status">No</span></p>
+                    <p>View: <span id="admin-current-view">-</span></p>
+                    <p>Paused: <span id="admin-paused-status">No</span></p>
+                    <p>Audio: <span id="admin-audio-status">-</span></p>
+                    <p>Entities: <span id="admin-entities-count">0</span></p>
+                </div>
+            </div>
+            <div class="admin-section">
+                <h3>Actions</h3>
+                <div class="admin-actions">
+                    <button class="admin-btn" onclick="adminForceSunset()">Sunset OFF</button>
+                </div>
+            </div>
+        </div>
+
         <div id="start-screen">
             <div id="update-btn" onclick="document.getElementById('update-modal').style.display='block'"><svg
                     viewBox="0 0 24 24">

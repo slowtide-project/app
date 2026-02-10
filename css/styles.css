@@ -382,3 +382,118 @@ canvas {
 #begin-btn:active {
     transform: scale(0.95);
 }
+
+/* =========================================================================
+   ADMIN OVERLAY
+   ========================================================================= */
+
+#admin-overlay {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    width: 220px;
+    background: rgba(20, 20, 20, 0.95);
+    border: 1px solid #c0392b;
+    border-radius: 8px;
+    padding: 12px;
+    z-index: 10000;
+    display: none;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+    font-size: 12px;
+}
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #c0392b;
+}
+
+.admin-header span {
+    color: #e74c3c;
+    font-weight: bold;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.admin-close-btn {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+}
+
+.admin-close-btn:hover {
+    color: #fff;
+}
+
+.admin-section {
+    margin-bottom: 12px;
+}
+
+.admin-section:last-child {
+    margin-bottom: 0;
+}
+
+.admin-section h3 {
+    font-size: 11px;
+    color: #666;
+    margin: 0 0 6px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.admin-info {
+    background: #111;
+    border-radius: 4px;
+    padding: 8px;
+    font-family: monospace;
+    font-size: 11px;
+}
+
+.admin-info p {
+    margin: 4px 0;
+    color: #888;
+}
+
+.admin-info span {
+    color: #4a90e2;
+}
+
+.admin-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+}
+
+.admin-btn {
+    background: #2a2a2a;
+    border: 1px solid #444;
+    color: #ccc;
+    padding: 6px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.admin-btn:hover {
+    background: #3a3a3a;
+    border-color: #555;
+}
+
+.admin-btn:active {
+    background: #4a4a4a;
+}
+
+.admin-btn.active {
+    background: #e74c3c;
+    border-color: #c0392b;
+    color: white;
+}

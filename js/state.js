@@ -35,6 +35,7 @@ export const DOM = {
     confirmModal: null,
     updateModal: null,
     instructionsModal: null,
+    adminOverlay: null,
     startScreen: null,
     timerDisplay: null,
     pauseBtn: null,
@@ -52,6 +53,7 @@ export function initDOM() {
     DOM.confirmModal = document.getElementById('confirm-modal');
     DOM.updateModal = document.getElementById('update-modal');
     DOM.instructionsModal = document.getElementById('instructions-modal');
+    DOM.adminOverlay = document.getElementById('admin-overlay');
     DOM.startScreen = document.getElementById('start-screen');
     DOM.timerDisplay = document.getElementById('timer-display');
     DOM.pauseBtn = document.getElementById('pause-btn');
