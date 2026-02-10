@@ -51,9 +51,10 @@
                 <button class="opt-btn sfx-btn" data-sfx="off" onclick="setSFX('off')">OFF</button>
             </div>
 
+            <button class="action-btn close-btn" onclick="showAdvancedOptionsFromSettings()">Advanced Options...</button>
+
             <button class="action-btn close-btn" onclick="closeSettings()">Close & Resume</button>
-            <a href="https://buymeacoffee.com/gary.rutland" target="_blank" class="action-btn donate-btn">☕ Buy
-                Developer a Coffee</a>
+            <a href="https://buymeacoffee.com/gary.rutland" target="_blank" class="action-btn close-btn" style="display: block; text-decoration: none;">Buy Developer a Coffee</a>
             <button class="action-btn quit-btn" onclick="showQuitConfirm()">End Session</button>
         </div>
 
@@ -66,6 +67,41 @@
                 <button class="action-btn quit-btn flex-1 mt-0" onclick="resetApp()">End
                     Session</button>
             </div>
+        </div>
+
+        <div id="advanced-options-modal" class="modal-overlay">
+            <h2>Advanced Options</h2>
+            <p class="modal-subtitle">Configure engagement settings for your child</p>
+
+            <div class="setting-row">
+                <span class="setting-label">Behavior Pattern</span>
+                <button class="opt-btn pattern-btn selected" data-pattern="chaos" onclick="changeBehaviorPattern('chaos')">Chaos</button>
+                <button class="opt-btn pattern-btn" data-pattern="rhythm" onclick="changeBehaviorPattern('rhythm')">Rhythm</button>
+                <button class="opt-btn pattern-btn" data-pattern="mix" onclick="changeBehaviorPattern('mix')">Mix</button>
+            </div>
+
+            <div class="setting-row">
+                <span class="setting-label">Auto-Switch Mode</span>
+                <button class="opt-btn switch-btn selected" data-switch="on" onclick="changeAutoSwitchMode('on')">On</button>
+                <button class="opt-btn switch-btn" data-switch="off" onclick="changeAutoSwitchMode('off')">Off</button>
+                <button class="opt-btn switch-btn" data-switch="long" onclick="changeAutoSwitchMode('long')">Long</button>
+            </div>
+
+            <div class="setting-row">
+                <span class="setting-label">Visual Density</span>
+                <button class="opt-btn density-btn" data-density="minimal" onclick="changeVisualDensity('minimal')">Minimal</button>
+                <button class="opt-btn density-btn selected" data-density="standard" onclick="changeVisualDensity('standard')">Standard</button>
+                <button class="opt-btn density-btn" data-density="rich" onclick="changeVisualDensity('rich')">Rich</button>
+            </div>
+
+            <div class="setting-row">
+                <span class="setting-label">Emergent Events</span>
+                <button class="opt-btn emergent-btn selected" data-emergent="off" onclick="changeEmergentEvents('off')">Off</button>
+                <button class="opt-btn emergent-btn" data-emergent="rare" onclick="changeEmergentEvents('rare')">Rare</button>
+                <button class="opt-btn emergent-btn" data-emergent="common" onclick="changeEmergentEvents('common')">Common</button>
+            </div>
+
+            <button class="action-btn close-btn mt-20" onclick="closeAdvancedOptions()">Done</button>
         </div>
 
         <div id="update-modal" class="modal-overlay">
@@ -147,6 +183,12 @@
                         onclick="changeSound('static')">Static</button>
                     <button class="start-btn sound-btn" data-sound="waves" onclick="changeSound('waves')">Waves</button>
                     <button class="start-btn sound-btn" data-sound="off" onclick="changeSound('off')">Silent</button>
+                </div>
+            </div>
+            <div class="picker-section">
+                <p class="picker-label">Options</p>
+                <div class="start-opt-row">
+                    <button class="start-btn" onclick="showAdvancedOptions()">Advanced Options</button>
                 </div>
             </div>
             <div id="begin-btn">BEGIN SESSION</div>

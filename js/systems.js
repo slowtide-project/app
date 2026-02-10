@@ -134,8 +134,14 @@ export const IdleManager = {
         if (idleTime > CONFIG.GHOST_INTERACTION_TIME && Math.random() < CONFIG.IDLE_INTERACTION_CHANCE) {
             this.ghostInteraction();
         }
-        if (idleTime > CONFIG.IDLE_VIEW_SWITCH_TIME) {
-            this.switchToRandomView();
+        
+        // Auto-switch logic based on parent setting
+        if (AppState.autoSwitchMode !== 'off') {
+            let switchTime = AppState.autoSwitchMode === 'long' ? 
+                CONFIG.IDLE_VIEW_SWITCH_TIME_LONG : CONFIG.IDLE_VIEW_SWITCH_TIME;
+            if (idleTime > switchTime) {
+                this.switchToRandomView();
+            }
         }
     },
 

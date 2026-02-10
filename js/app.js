@@ -56,10 +56,7 @@ function changeDuration(mins) {
         if (b.getAttribute('data-time') == mins) b.classList.add('selected');
     });
     Timer.updateDisplay();
-    savePreferences({
-        duration: AppState.sessionMinutes,
-        sound: AppState.currentSound
-    });
+    saveAllPreferences();
 }
 
 /**
@@ -76,10 +73,7 @@ function changeSound(type) {
         if (AudioState.context.state === 'suspended') AudioState.context.resume();
         AudioEngine.generateSoundBuffer(type);
     }
-    savePreferences({
-        duration: AppState.sessionMinutes,
-        sound: AppState.currentSound
-    });
+    saveAllPreferences();
 }
 
 /**
@@ -91,6 +85,75 @@ function setSFX(val) {
     document.querySelectorAll('.sfx-btn').forEach(b => {
         b.classList.remove('selected');
         if (b.getAttribute('data-sfx') === val) b.classList.add('selected');
+    });
+    saveAllPreferences();
+}
+
+/**
+ * Change behavior pattern
+ * @param {string} pattern - 'chaos', 'rhythm', or 'mix'
+ */
+function changeBehaviorPattern(pattern) {
+    AppState.behaviorPattern = pattern;
+    document.querySelectorAll('.pattern-btn').forEach(b => {
+        b.classList.remove('selected');
+        if (b.getAttribute('data-pattern') === pattern) b.classList.add('selected');
+    });
+    saveAllPreferences();
+}
+
+/**
+ * Change auto-switch mode
+ * @param {string} mode - 'on', 'off', or 'long'
+ */
+function changeAutoSwitchMode(mode) {
+    AppState.autoSwitchMode = mode;
+    document.querySelectorAll('.switch-btn').forEach(b => {
+        b.classList.remove('selected');
+        if (b.getAttribute('data-switch') === mode) b.classList.add('selected');
+    });
+    saveAllPreferences();
+}
+
+/**
+ * Change visual density
+ * @param {string} density - 'minimal', 'standard', or 'rich'
+ */
+function changeVisualDensity(density) {
+    AppState.visualDensity = density;
+    document.querySelectorAll('.density-btn').forEach(b => {
+        b.classList.remove('selected');
+        if (b.getAttribute('data-density') === density) b.classList.add('selected');
+    });
+    // Reinitialize current view to apply density change
+    ViewManager.switchView(AppState.currentView);
+    saveAllPreferences();
+}
+
+/**
+ * Change emergent events setting
+ * @param {string} events - 'off', 'rare', or 'common'
+ */
+function changeEmergentEvents(events) {
+    AppState.emergentEvents = events;
+    document.querySelectorAll('.emergent-btn').forEach(b => {
+        b.classList.remove('selected');
+        if (b.getAttribute('data-emergent') === events) b.classList.add('selected');
+    });
+    saveAllPreferences();
+}
+
+/**
+ * Save all current preferences to storage
+ */
+function saveAllPreferences() {
+    savePreferences({
+        duration: AppState.sessionMinutes,
+        sound: AppState.currentSound,
+        behaviorPattern: AppState.behaviorPattern,
+        autoSwitchMode: AppState.autoSwitchMode,
+        visualDensity: AppState.visualDensity,
+        emergentEvents: AppState.emergentEvents
     });
 }
 
@@ -114,6 +177,32 @@ function closeSettings() { DOM.settingsModal.style.display = 'none'; }
 function showQuitConfirm() { DOM.settingsModal.style.display = 'none'; DOM.confirmModal.style.display = 'block'; }
 function closeQuitConfirm() { DOM.confirmModal.style.display = 'none'; DOM.settingsModal.style.display = 'block'; }
 function performUpdate() { window.location.reload(); }
+
+/**
+ * Show advanced options modal from start screen
+ */
+function showAdvancedOptions() {
+    DOM.advancedOptionsModal.style.display = 'block';
+}
+
+/**
+ * Show advanced options modal from settings (during session)
+ */
+function showAdvancedOptionsFromSettings() {
+    DOM.settingsModal.style.display = 'none';
+    DOM.advancedOptionsModal.style.display = 'block';
+}
+
+/**
+ * Close advanced options modal
+ */
+function closeAdvancedOptions() {
+    DOM.advancedOptionsModal.style.display = 'none';
+    // If we're in a session, show settings modal again
+    if (AppState.isSessionRunning) {
+        DOM.settingsModal.style.display = 'block';
+    }
+}
 
 /** Reset application to start state */
 function resetApp() {
@@ -254,8 +343,17 @@ function initApp() {
     const savedPrefs = loadPreferences();
     const duration = savedPrefs?.duration ?? CONFIG.DEFAULT_SESSION_MINUTES;
     const sound = savedPrefs?.sound ?? SOUND_TYPES.DEEP;
+    const behaviorPattern = savedPrefs?.behaviorPattern ?? CONFIG.DEFAULT_BEHAVIOR_PATTERN;
+    const autoSwitchMode = savedPrefs?.autoSwitchMode ?? CONFIG.DEFAULT_AUTO_SWITCH_MODE;
+    const visualDensity = savedPrefs?.visualDensity ?? CONFIG.DEFAULT_VISUAL_DENSITY;
+    const emergentEvents = savedPrefs?.emergentEvents ?? CONFIG.DEFAULT_EMERGENT_EVENTS;
+    
     changeDuration(duration);
     changeSound(sound);
+    changeBehaviorPattern(behaviorPattern);
+    changeAutoSwitchMode(autoSwitchMode);
+    changeVisualDensity(visualDensity);
+    changeEmergentEvents(emergentEvents);
 
     // Begin button click handler
     DOM.beginBtn.addEventListener('click', function () {
@@ -280,12 +378,19 @@ window.switchView = ViewManager.switchView;
 window.changeDuration = changeDuration;
 window.changeSound = changeSound;
 window.setSFX = setSFX;
+window.changeBehaviorPattern = changeBehaviorPattern;
+window.changeAutoSwitchMode = changeAutoSwitchMode;
+window.changeVisualDensity = changeVisualDensity;
+window.changeEmergentEvents = changeEmergentEvents;
 window.togglePause = togglePause;
 window.closeSettings = closeSettings;
 window.showQuitConfirm = showQuitConfirm;
 window.closeQuitConfirm = closeQuitConfirm;
 window.resetApp = resetApp;
 window.performUpdate = performUpdate;
+window.showAdvancedOptions = showAdvancedOptions;
+window.showAdvancedOptionsFromSettings = showAdvancedOptionsFromSettings;
+window.closeAdvancedOptions = closeAdvancedOptions;
 
 // Admin mode functions
 window.toggleAdminOverlay = toggleAdminOverlay;

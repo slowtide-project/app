@@ -104,6 +104,70 @@ export const CONFIG = {
 
 ---
 
+## 🔧 Adding Parent-Configurable Settings
+
+**When to use**: Adding new parent-controlled options (behavior patterns, visual settings, engagement options)
+
+**Agent**: General Purpose
+**Files to modify**:
+- `js/config.js` - Add enum and default values
+- `js/state.js` - Add to AppState
+- `js/storage.js` - Update JSDoc for preferences
+- `js/app.js` - Add change handlers and save functions
+- `js/views/[view].js` - Implement setting in relevant views
+- `index.html` - Add UI controls (typically in Advanced Options modal)
+
+**Pattern to follow**:
+
+**1. Add enum to config.js:**
+```javascript
+export const YOUR_SETTING = {
+    OPTION1: 'option1',
+    OPTION2: 'option2'
+};
+
+export const CONFIG = {
+    DEFAULT_YOUR_SETTING: 'option1',
+    // ... other settings
+};
+```
+
+**2. Add to AppState in state.js:**
+```javascript
+export const AppState = {
+    // ... existing state
+    yourSetting: 'option1'
+};
+```
+
+**3. Add change handler in app.js:**
+```javascript
+function changeYourSetting(value) {
+    AppState.yourSetting = value;
+    document.querySelectorAll('.your-btn').forEach(b => {
+        b.classList.remove('selected');
+        if (b.getAttribute('data-your') === value) b.classList.add('selected');
+    });
+    saveAllPreferences();
+}
+```
+
+**4. Use in view files:**
+```javascript
+// In update() or init() methods
+if (AppState.yourSetting === 'option1') {
+    // Apply option 1 behavior
+}
+```
+
+**Parent Access Pattern:**
+- Simple settings: Start screen or Settings modal
+- Advanced settings: "Advanced Options" modal accessible from both Start screen and Settings
+- All settings saved to localStorage automatically
+- Child never sees these UI controls during play
+
+---
+
 ## 🐛 Debugging Issues
 
 **When to use**: Runtime errors, unexpected behavior

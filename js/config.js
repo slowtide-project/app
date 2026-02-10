@@ -38,7 +38,24 @@ export const CONFIG = {
     SYNTH_FREQUENCY_RANGE: { MIN: 200, MAX: 800 },
     LIQUID_FADE_ALPHA: 0.08,
     HAPTIC_FEEDBACK_DURATION: 10,
-    CANVAS_AREA_DIVISOR: 8000
+    CANVAS_AREA_DIVISOR: 8000,
+    // Default parent settings
+    DEFAULT_BEHAVIOR_PATTERN: 'chaos',
+    DEFAULT_AUTO_SWITCH_MODE: 'on',
+    DEFAULT_VISUAL_DENSITY: 'standard',
+    DEFAULT_EMERGENT_EVENTS: 'off',
+    // Timing for different modes
+    IDLE_VIEW_SWITCH_TIME_LONG: 120000, // 2 minutes for long mode
+    // Density multipliers
+    DENSITY_MINIMAL_MULTIPLIER: 0.4,
+    DENSITY_STANDARD_MULTIPLIER: 1.0,
+    DENSITY_RICH_MULTIPLIER: 1.8,
+    // Emergent event chances (per frame)
+    EMERGENT_EVENT_CHANCE_RARE: 0.001,
+    EMERGENT_EVENT_CHANCE_COMMON: 0.005,
+    // Rhythm mode settings
+    RHYTHM_MODE_AMPLITUDE: 0.5,
+    RHYTHM_MODE_SPEED: 0.001
 };
 
 export const SOUND_TYPES = {
@@ -55,4 +72,28 @@ export const VIEWS = {
     BUBBLES: 'bubbles',
     LIQUID: 'liquid',
     MARBLES: 'marbles'
+};
+
+export const BEHAVIOR_PATTERNS = {
+    CHAOS: 'chaos',
+    RHYTHM: 'rhythm',
+    MIX: 'mix'
+};
+
+export const AUTO_SWITCH_MODES = {
+    ON: 'on',
+    OFF: 'off',
+    LONG: 'long'
+};
+
+export const VISUAL_DENSITY = {
+    MINIMAL: 'minimal',
+    STANDARD: 'standard',
+    RICH: 'rich'
+};
+
+export const EMERGENT_EVENTS = {
+    OFF: 'off',
+    RARE: 'rare',
+    COMMON: 'common'
 };

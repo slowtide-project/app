@@ -271,6 +271,14 @@ canvas {
     margin-bottom: 12px;
 }
 
+.modal-subtitle {
+    font-size: 13px;
+    color: #666;
+    margin-top: -8px;
+    margin-bottom: 20px;
+    font-style: italic;
+}
+
 /* =========================================================================
    START SCREEN
    ========================================================================= */

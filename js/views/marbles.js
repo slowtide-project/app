@@ -2,13 +2,23 @@ import { AppState, DOM } from '../state.js';
 import { CONFIG } from '../config.js';
 import { SFX } from '../audio.js';
 
+// Helper function to get density multiplier
+function getDensityMultiplier() {
+    switch(AppState.visualDensity) {
+        case 'minimal': return CONFIG.DENSITY_MINIMAL_MULTIPLIER;
+        case 'rich': return CONFIG.DENSITY_RICH_MULTIPLIER;
+        default: return CONFIG.DENSITY_STANDARD_MULTIPLIER;
+    }
+}
+
 // 5. MARBLES VIEW
 export const Marbles = {
     /**
      * Initialize marbles
      */
     init() {
-        for (let i = 0; i < CONFIG.MARBLE_COUNT; i++) {
+        let marbleCount = Math.floor(CONFIG.MARBLE_COUNT * getDensityMultiplier());
+        for (let i = 0; i < marbleCount; i++) {
             AppState.entities.push({
                 x: Math.random() * DOM.canvas.width, 
                 y: Math.random() * DOM.canvas.height, 
@@ -35,11 +45,38 @@ export const Marbles = {
     },
 
     /**
+     * Check for and handle marble clustering (emergent event)
+     */
+    checkClustering() {
+        if (AppState.emergentEvents === 'off') return;
+        let chance = AppState.emergentEvents === 'rare' ? 
+            CONFIG.EMERGENT_EVENT_CHANCE_RARE : CONFIG.EMERGENT_EVENT_CHANCE_COMMON;
+        
+        if (Math.random() >= chance) return;
+        
+        // Occasionally give all marbles a gentle push toward center
+        let centerX = DOM.canvas.width / 2;
+        let centerY = (DOM.canvas.height + CONFIG.HEADER_HEIGHT) / 2;
+        
+        AppState.entities.forEach(m => {
+            let dx = centerX - m.x, dy = centerY - m.y;
+            let dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist > 50) {
+                m.vx += (dx / dist) * 0.3;
+                m.vy += (dy / dist) * 0.3;
+            }
+        });
+    },
+
+    /**
      * Update marble physics
      */
     update() {
         DOM.ctx.fillStyle = 'rgba(5,5,5,0.3)'; 
         DOM.ctx.fillRect(0, 0, DOM.canvas.width, DOM.canvas.height);
+        
+        // Check for emergent events
+        this.checkClustering();
         
         for (let i = 0; i < AppState.entities.length; i++) {
             let m = AppState.entities[i]; 
