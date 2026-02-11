@@ -104,7 +104,7 @@ const GhostInteractionHandlers = {
     [VIEWS.LIQUID]: () => {
         const cx = Math.random() * DOM.canvas.width;
         const cy = Math.random() * DOM.canvas.height;
-        Liquid.spawn(cx, cy);
+        Liquid.handleStart(cx, cy);
     },
     [VIEWS.SORTING]: () => {
         if (AppState.entities.length > 0) {

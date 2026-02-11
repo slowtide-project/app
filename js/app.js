@@ -240,8 +240,8 @@ const ViewInputHandlers = {
         start: (x, y) => Bubbles.handleStart(x, y)
     },
     [VIEWS.LIQUID]: {
-        start: (x, y, yRatio) => { Liquid.spawn(x, y); ContinuousSynth.start(VIEWS.LIQUID, yRatio); },
-        move: (x, y) => Liquid.spawn(x, y)
+        start: (x, y, yRatio) => { Liquid.handleStart(x, y); ContinuousSynth.start(VIEWS.LIQUID, yRatio); },
+        move: (x, y) => Liquid.handleStart(x, y)
     },
     [VIEWS.MARBLES]: {
         start: (x, y) => Marbles.handleInput(x, y),

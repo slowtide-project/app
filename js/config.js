@@ -55,7 +55,14 @@ export const CONFIG = {
     EMERGENT_EVENT_CHANCE_COMMON: 0.005,
     // Rhythm mode settings
     RHYTHM_MODE_AMPLITUDE: 0.5,
-    RHYTHM_MODE_SPEED: 0.001
+    RHYTHM_MODE_SPEED: 0.001,
+    // Liquid view enhancements
+    LIQUID_MAX_DROPS: 12, // Increased for more visible activity
+    LIQUID_DROP_LIFETIME: 8000,
+    LIQUID_RIPPLE_SPEED: 2,
+    LIQUID_RIPPLE_LIFETIME: 3000,
+    // LIQUID_GRAVITY_STRENGTH: 0.3, // Removed - no gravity
+    // LIQUID_POOL_Y_FACTOR: 0.8,    // Removed - no pooling
 };
 
 export const SOUND_TYPES = {
