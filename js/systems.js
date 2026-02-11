@@ -1,6 +1,5 @@
-import { AppState, DOM } from './state.js';
+import { AppState, DOM, AudioState } from './state.js';
 import { CONFIG, VIEWS } from './config.js';
-import { AudioState, AppState } from './state.js';
 import { ContinuousSynth } from './audio.js';
 import { Particles } from './views/particles.js';
 import { Bubbles } from './views/bubbles.js';

@@ -413,13 +413,21 @@ function animate() {
  * Initialize application
  */
 function initApp() {
-    // Initialize DOM references
-    initDOM();
+    try {
+        // Initialize DOM references
+        initDOM();
 
-    // Initialize event listeners
-    initParentMenu();
-    initAdminMode();
-    InputManager.init();
+        // Initialize event listeners
+        initParentMenu();
+        initAdminMode();
+        InputManager.init();
+    } catch (error) {
+        console.error('App initialization error:', error);
+        if (typeof trackError === 'function') {
+            trackError(error, 'app_initialization');
+        }
+        return;
+    }
 
     // Load saved preferences or use defaults
     const savedPrefs = loadPreferences();
@@ -445,10 +453,11 @@ function initApp() {
 
     // Begin button click handler
     DOM.beginBtn.addEventListener('click', function () {
-        DOM.startScreen.style.display = 'none';
-        DOM.navBar.style.display = 'flex';
-        setTimeout(() => DOM.navBar.style.opacity = 1, 100);
-        InputManager.resize();
+        try {
+            DOM.startScreen.style.display = 'none';
+            DOM.navBar.style.display = 'flex';
+            setTimeout(() => DOM.navBar.style.opacity = 1, 100);
+            InputManager.resize();
         
         const views = Object.values(VIEWS);
         const randomView = views[Math.floor(Math.random() * views.length)];
@@ -461,13 +470,21 @@ function initApp() {
         // Generate session identifier and track session start
         const sessionIdentifier = generateSessionIdentifier();
         AppState.sessionIdentifier = sessionIdentifier; // Store for reference
-        DOM.sessionIdEl.textContent = sessionIdentifier;
-        DOM.sessionIdEl.style.display = 'block';
+        if (DOM.sessionIdEl) {
+            DOM.sessionIdEl.textContent = `Session ID: ${sessionIdentifier}`;
+            DOM.sessionIdEl.style.display = 'block';
+        }
         trackSessionStart(sessionIdentifier);
         
-        AudioEngine.init();
-        animate();
-        Timer.start(true);
+            AudioEngine.init();
+            animate();
+            Timer.start(true);
+        } catch (error) {
+            console.error('Begin session error:', error);
+            if (typeof trackError === 'function') {
+                trackError(error, 'begin_session');
+            }
+        }
     });
 }
 
