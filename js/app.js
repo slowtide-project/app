@@ -14,6 +14,7 @@ import { Bubbles } from './views/bubbles.js';
 import { Liquid } from './views/liquid.js';
 import { Marbles } from './views/marbles.js';
 import { initAdminMode, toggleAdminOverlay, adminForceSunset } from './admin.js';
+import { generateMathsQuestion } from './utils.js';
 import { trackSessionStart, trackSessionEnd, trackAtmosphereChange, trackDurationChange, trackSFXChange, trackParentSettingChange, trackActivitySwitch, trackAppUpdate, trackPageView, trackVirtualPageView, trackError, trackEngagement, setupEngagementTracking, generateSessionIdentifier } from './analytics.js';
 
 // =========================================================================
@@ -40,11 +41,64 @@ function handleTitleTap() {
     clearTimeout(ParentMenu.tapResetTimer);
     ParentMenu.tapCount++;
     if (ParentMenu.tapCount >= 5) {
-        DOM.settingsModal.style.display = 'block';
+        showMathsChallenge();
         ParentMenu.tapCount = 0;
     } else {
         ParentMenu.tapResetTimer = setTimeout(() => { ParentMenu.tapCount = 0; }, 500);
     }
+}
+
+// =========================================================================
+// MATHS CHALLENGE SYSTEM
+// =========================================================================
+
+/**
+ * Show the maths challenge modal with a new question
+ */
+function showMathsChallenge() {
+    const questionData = generateMathsQuestion();
+    AppState.mathsChallenge.currentQuestion = questionData.question;
+    AppState.mathsChallenge.correctAnswer = questionData.answer;
+    AppState.mathsChallenge.isActive = true;
+    
+    DOM.mathsQuestionEl.textContent = questionData.question;
+    DOM.mathsChallengeModal.style.display = 'block';
+}
+
+/**
+ * Check the user's answer to the maths challenge
+ * @param {number} answer - The user's answer
+ */
+function checkMathsAnswer(answer) {
+    if (!AppState.mathsChallenge.isActive) return;
+    
+    if (answer === AppState.mathsChallenge.correctAnswer) {
+        // Correct answer - open settings
+        closeMathsChallenge();
+        DOM.settingsModal.style.display = 'block';
+    } else {
+        // Wrong answer - shake modal and generate new question
+        DOM.mathsChallengeModal.style.animation = 'shake 0.3s';
+        setTimeout(() => {
+            DOM.mathsChallengeModal.style.animation = '';
+        }, 300);
+        
+        // Generate new question
+        const questionData = generateMathsQuestion();
+        AppState.mathsChallenge.currentQuestion = questionData.question;
+        AppState.mathsChallenge.correctAnswer = questionData.answer;
+        DOM.mathsQuestionEl.textContent = questionData.question;
+    }
+}
+
+/**
+ * Close the maths challenge modal
+ */
+function closeMathsChallenge() {
+    AppState.mathsChallenge.isActive = false;
+    AppState.mathsChallenge.currentQuestion = null;
+    AppState.mathsChallenge.correctAnswer = null;
+    DOM.mathsChallengeModal.style.display = 'none';
 }
 
 /**
@@ -530,6 +584,10 @@ window.performUpdate = performUpdate;
 window.showAdvancedOptions = showAdvancedOptions;
 window.showAdvancedOptionsFromSettings = showAdvancedOptionsFromSettings;
 window.closeAdvancedOptions = closeAdvancedOptions;
+
+// Maths challenge functions
+window.checkMathsAnswer = checkMathsAnswer;
+window.closeMathsChallenge = closeMathsChallenge;
 
 // Admin mode functions
 window.toggleAdminOverlay = toggleAdminOverlay;

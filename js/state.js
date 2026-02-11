@@ -26,7 +26,13 @@ export const AppState = {
     currentEngagementPhase: 'high',
     phaseStartTime: 0,
     // Session tracking
-    sessionIdentifier: null
+    sessionIdentifier: null,
+    // Maths challenge state
+    mathsChallenge: {
+        currentQuestion: null,
+        correctAnswer: null,
+        isActive: false
+    }
 };
 
 /** Audio system state variables */
@@ -56,6 +62,8 @@ export const DOM = {
     canvas: null,
     sunsetOverlay: null,
     beginBtn: null,
+    mathsChallengeModal: null,
+    mathsQuestionEl: null,
     ctx: null
 };
 
@@ -76,5 +84,7 @@ export function initDOM() {
     DOM.canvas = document.getElementById('main-canvas');
     DOM.sunsetOverlay = document.getElementById('sunset-overlay');
     DOM.beginBtn = document.getElementById('begin-btn');
+    DOM.mathsChallengeModal = document.getElementById('maths-challenge-modal');
+    DOM.mathsQuestionEl = document.getElementById('maths-question');
     DOM.ctx = DOM.canvas.getContext('2d');
 }

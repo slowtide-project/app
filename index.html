@@ -152,10 +152,28 @@
             </div>
         </div>
 
+        <div id="maths-challenge-modal" class="modal-overlay">
+            <h2>Parent Verification</h2>
+            <p class="modal-subtitle">Solve this to access settings</p>
+            <div class="maths-question" id="maths-question">Loading...</div>
+            <div class="maths-answer-grid">
+                <button class="maths-btn" onclick="checkMathsAnswer(1)">1</button>
+                <button class="maths-btn" onclick="checkMathsAnswer(2)">2</button>
+                <button class="maths-btn" onclick="checkMathsAnswer(3)">3</button>
+                <button class="maths-btn" onclick="checkMathsAnswer(4)">4</button>
+                <button class="maths-btn" onclick="checkMathsAnswer(5)">5</button>
+                <button class="maths-btn" onclick="checkMathsAnswer(6)">6</button>
+                <button class="maths-btn" onclick="checkMathsAnswer(7)">7</button>
+                <button class="maths-btn" onclick="checkMathsAnswer(8)">8</button>
+                <button class="maths-btn" onclick="checkMathsAnswer(9)">9</button>
+            </div>
+            <button class="action-btn close-btn" onclick="closeMathsChallenge()">Cancel</button>
+        </div>
+
         <div id="instructions-modal" class="modal-overlay">
             <h2>Parent Guide</h2>
             <p><strong>1. The Goal:</strong> A low-stimulation environment to help wind down.</p>
-            <p><strong>2. Parent Menu:</strong> Tap the "Slowtide" title 5 times quickly to access settings.</p>
+            <p><strong>2. Parent Menu:</strong> Tap the "Slowtide" title 5 times quickly, then solve a maths question to access settings.</p>
             <p><strong>3. Sunset Timer:</strong> The screen dims and audio fades out automatically.</p>
             <p><strong>4. Tips:</strong> Use "Guided Access" (iOS) or "App Pinning" (Android) to lock your child inside
                 the app.</p>

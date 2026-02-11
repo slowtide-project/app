@@ -159,6 +159,54 @@ canvas {
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9);
 }
 
+/* Maths Challenge Specific Styles */
+.maths-question {
+    font-size: 28px;
+    font-weight: bold;
+    text-align: center;
+    color: #4a90e2;
+    margin: 20px 0;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 2px;
+}
+
+.maths-answer-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.maths-btn {
+    background: #333;
+    border: 1px solid #555;
+    color: white;
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 50px;
+}
+
+.maths-btn:hover {
+    background: #4a90e2;
+    border-color: #4a90e2;
+    transform: scale(1.05);
+}
+
+.maths-btn:active {
+    transform: scale(0.95);
+}
+
+/* Shake animation for wrong answers */
+@keyframes shake {
+    0%, 100% { transform: translate(-50%, -50%) translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translate(-50%, -50%) translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translate(-50%, -50%) translateX(5px); }
+}
+
 #timer-display {
     text-align: center;
     color: #4a90e2;
