@@ -40,8 +40,8 @@
         </div>
 
         <div id="settings-modal" class="modal-overlay">
-            <div id="timer-display">Not Started</div>
             <div id="session-id" class="session-id" style="display: none;"></div>
+            <div id="timer-display">Not Started</div>
             <button id="pause-btn" class="action-btn pause-btn" onclick="togglePause()">Pause Session</button>
 
             <div class="setting-row mt-20">
@@ -72,9 +72,9 @@
                 Options...</button>
 
             <button class="action-btn close-btn" onclick="closeSettings()">Close & Resume</button>
+            <button class="action-btn quit-btn" onclick="showQuitConfirm()">End Session</button>
             <a href="https://buymeacoffee.com/gary.rutland" target="_blank" class="action-btn close-btn"
                 style="display: block; text-decoration: none;">Buy Developer a Coffee</a>
-            <button class="action-btn quit-btn" onclick="showQuitConfirm()">End Session</button>
         </div>
 
         <div id="confirm-modal" class="modal-overlay">

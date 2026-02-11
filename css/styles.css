@@ -162,12 +162,9 @@ canvas {
 #timer-display {
     text-align: center;
     color: #4a90e2;
-    margin-bottom: 20px;
     font-size: 18px;
     font-variant-numeric: tabular-nums;
     letter-spacing: 1px;
-    border-bottom: 1px solid #333;
-    padding-bottom: 15px;
     font-weight: bold;
 }
 
@@ -232,7 +229,7 @@ canvas {
 .quit-btn {
     background: #c0392b;
     color: white;
-    margin-top: 20px;
+    margin: 20px 0;
     border: 1px solid #e74c3c;
 }
 
