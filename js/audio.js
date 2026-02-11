@@ -28,7 +28,7 @@ export const AudioEngine = {
             AudioState.gainNode.gain.value = 0; 
             return; 
         } else { 
-            AudioState.gainNode.gain.value = 0.8; 
+            AudioState.gainNode.gain.value = CONFIG.ATMOSPHERE_VOLUME; 
         }
 
         const bufferSize = AudioState.context.sampleRate * 2;
