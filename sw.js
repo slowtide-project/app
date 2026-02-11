@@ -2,7 +2,7 @@
 // Service Worker for Slowtide PWA
 // =========================================================================
 
-const CACHE_NAME = 'slowtide-v1';
+const CACHE_NAME = 'slowtide-v2';
 const STATIC_ASSETS = [
     './',
     './index.html',

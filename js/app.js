@@ -226,7 +226,11 @@ function closeQuitConfirm() {
 }
 function performUpdate() { 
     trackAppUpdate();
-    window.location.reload(); 
+    
+    // Force cache bypass by adding timestamp
+    const timestamp = new Date().getTime();
+    const url = window.location.href.split('?')[0] + '?v=' + timestamp;
+    window.location.href = url;
 }
 
 /**
