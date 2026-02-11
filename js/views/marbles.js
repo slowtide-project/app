@@ -62,8 +62,8 @@ export const Marbles = {
             let dx = centerX - m.x, dy = centerY - m.y;
             let dist = Math.sqrt(dx * dx + dy * dy);
             if (dist > 50) {
-                m.vx += (dx / dist) * 0.3;
-                m.vy += (dy / dist) * 0.3;
+                m.vx += (dx / dist) * 1.5;
+                m.vy += (dy / dist) * 1.5;
             }
         });
     },

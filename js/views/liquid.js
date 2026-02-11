@@ -1,4 +1,4 @@
-import { DOM } from '../state.js';
+import { AppState, DOM } from '../state.js';
 import { CONFIG } from '../config.js';
 
 // 4. LIQUID VIEW - Simple elegant version
@@ -39,11 +39,45 @@ export const Liquid = {
     },
 
     /**
+     * Check for and handle spontaneous ripples (emergent event)
+     */
+    checkSpontaneousRipples() {
+        if (AppState.emergentEvents === 'off') return;
+        let chance = AppState.emergentEvents === 'rare' ? 
+            CONFIG.EMERGENT_EVENT_CHANCE_RARE : CONFIG.EMERGENT_EVENT_CHANCE_COMMON;
+        
+        if (Math.random() >= chance) return;
+        
+        // Create spontaneous ripple at random location
+        let x = Math.random() * DOM.canvas.width;
+        let y = Math.random() * DOM.canvas.height;
+        this.createRipple(x, y);
+    },
+
+    /**
+     * Create ripple effect at position
+     */
+    createRipple(x, y) {
+        for (let r = 10; r <= 50; r += 10) {
+            setTimeout(() => {
+                DOM.ctx.beginPath(); 
+                DOM.ctx.arc(x, y, r, 0, Math.PI * 2); 
+                DOM.ctx.strokeStyle = `hsla(${(Date.now() + r * 5) % 360},70%,60%,${0.8 - r/60})`; 
+                DOM.ctx.lineWidth = 3;
+                DOM.ctx.stroke();
+            }, (r - 10) * 40);
+        }
+    },
+
+    /**
      * Update liquid animation
      */
     update() {
         DOM.ctx.fillStyle = `rgba(5,5,5,${CONFIG.LIQUID_FADE_ALPHA})`; 
         DOM.ctx.fillRect(0, 0, DOM.canvas.width, DOM.canvas.height);
+        
+        // Check for emergent events
+        this.checkSpontaneousRipples();
         
         // Simple orbiting drops - much like original but more engaging
         this.orbitPhase += 0.01;

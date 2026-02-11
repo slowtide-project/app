@@ -98,8 +98,8 @@ export const Sorting = {
                 let dx = b2.x - b1.x, dy = b2.y - b1.y;
                 let dist = Math.sqrt(dx * dx + dy * dy);
                 if (dist < 150 && dist > 20) {
-                    // Attract toward each other
-                    let force = 0.5;
+                    // Attract toward each other - increased force for visible effect
+                    let force = 3.0;
                     b1.dx += (dx / dist) * force;
                     b1.dy += (dy / dist) * force;
                     b2.dx -= (dx / dist) * force;
