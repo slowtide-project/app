@@ -106,17 +106,17 @@ export const ContinuousSynth = {
             AudioState.activeSynth.type = 'sine';
             AudioState.activeSynth.frequency.value = freq;
             AudioState.activeSynthGain.gain.setValueAtTime(0, t);
-            AudioState.activeSynthGain.gain.linearRampToValueAtTime(0.15, t + 0.1);
+            AudioState.activeSynthGain.gain.linearRampToValueAtTime(0.3, t + 0.1);
         } else if (type === 'liquid') {
             AudioState.activeSynth.type = 'triangle';
             AudioState.activeSynth.frequency.value = freq * 0.5;
             AudioState.activeSynthGain.gain.setValueAtTime(0, t);
-            AudioState.activeSynthGain.gain.linearRampToValueAtTime(0.1, t + 0.2);
+            AudioState.activeSynthGain.gain.linearRampToValueAtTime(0.3, t + 0.2);
         } else if (type === 'sorting') {
             AudioState.activeSynth.type = 'sawtooth';
             AudioState.activeSynth.frequency.value = 60;
             AudioState.activeSynthGain.gain.setValueAtTime(0, t);
-            AudioState.activeSynthGain.gain.linearRampToValueAtTime(0.05, t + 0.1);
+            AudioState.activeSynthGain.gain.linearRampToValueAtTime(0.3, t + 0.1);
         }
 
         AudioState.activeSynth.start(t);
@@ -173,7 +173,7 @@ export const SFX = {
             osc.type = 'sine';
             osc.frequency.setValueAtTime(400, t);
             osc.frequency.exponentialRampToValueAtTime(100, t + 0.15);
-            gain.gain.setValueAtTime(0.4, t);
+            gain.gain.setValueAtTime(0.3, t);
             gain.gain.exponentialRampToValueAtTime(0.01, t + 0.15);
             osc.start(t); osc.stop(t + 0.15);
         } else if (type === 'clack') {
