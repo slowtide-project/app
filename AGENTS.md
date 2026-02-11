@@ -301,22 +301,29 @@ update() {
 
 **Current directory structure**:
 ```
-js/
-├── app.js          # Main application entry point
-├── config.js       # Configuration constants and enums
-├── state.js        # Global state management
-├── storage.js      # LocalStorage utilities
-├── audio.js        # Audio engine and sound effects
-├── systems.js      # Timer, idle manager, view manager
-├── admin.js        # Admin/debug overlay
-├── utils.js        # Shared utility functions
-└── views/          # Activity view modules
-    ├── particles.js
-    ├── bubbles.js
-    ├── sorting.js
-    ├── liquid.js
-    ├── marbles.js
-    └── [new views go here]
+├── js/             # JavaScript modules
+│   ├── app.js          # Main application entry point
+│   ├── config.js       # Configuration constants and enums
+│   ├── state.js        # Global state management
+│   ├── storage.js      # LocalStorage utilities
+│   ├── audio.js        # Audio engine and sound effects
+│   ├── systems.js      # Timer, idle manager, view manager
+│   ├── admin.js        # Admin/debug overlay
+│   ├── utils.js        # Shared utility functions
+│   └── views/          # Activity view modules
+│       ├── particles.js
+│       ├── bubbles.js
+│       ├── sorting.js
+│       ├── liquid.js
+│       ├── marbles.js
+│       └── [new views go here]
+├── css/            # Stylesheets
+│   └── styles.css       # All application styling
+├── assets/         # Static assets
+│   └── icon.png         # PWA icon
+├── index.html      # Main HTML file
+├── manifest.json   # PWA manifest
+└── sw.js          # Service worker for offline support
 ```
 
 **Benefits of current structure**:
@@ -326,6 +333,37 @@ js/
 - Reduced merge conflicts
 - Modern JavaScript practices
 - Scalable organization for adding new activities
+- **PWA-ready** with offline support
+
+---
+
+## 📱 PWA Features & Updates
+
+**When to use**: Modifying PWA functionality, updating service worker, or adding new assets
+
+**Agent**: General Purpose
+**Files to modify**:
+- `manifest.json` - PWA configuration, icons, display settings
+- `sw.js` - Service worker for caching and offline behavior
+- `index.html` - Service worker registration and manifest links
+
+**Current PWA features**:
+- ✅ Installable on Android/Chrome
+- ✅ Add to Home Screen on iOS
+- ✅ Offline functionality (all assets cached)
+- ✅ Standalone display mode
+- ✅ Custom theme colors
+
+**Service Worker Cache Management**:
+- All static assets are cached on install
+- Network requests fall back to cache
+- Navigate requests fallback to index.html
+- Update cache by changing `CACHE_NAME` in `sw.js`
+
+**Adding new files to cache**:
+1. Add file paths to `STATIC_ASSETS` array in `sw.js`
+2. Increment `CACHE_NAME` version to force cache update
+3. Test offline functionality
 
 ---
 
