@@ -266,13 +266,12 @@ export function trackVirtualPageView(screenName, additionalData = {}) {
     const deviceInfo = getDeviceInfo();
     const virtualUrl = '/screen/' + screenName.toLowerCase().replace(/\s+/g, '-');
     
-    // Update page configuration for proper page view tracking
-    gtag('config', 'G-TJX61DSDD8', {
+    // Track as page_view event with page info
+    gtag('event', 'page_view', {
         page_title: screenName,
         page_location: window.location.origin + virtualUrl,
-        anonymize_ip: true,
-        allow_google_signals: false,
-        allow_ad_personalization_signals: false
+        page_referrer: window.location.origin,
+        ...additionalData
     });
     
     // Also track as custom event for additional context

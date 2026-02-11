@@ -13,7 +13,7 @@ import { Bubbles } from './views/bubbles.js';
 import { Liquid } from './views/liquid.js';
 import { Marbles } from './views/marbles.js';
 import { initAdminMode, toggleAdminOverlay, adminForceSunset } from './admin.js';
-import { trackSessionStart, trackSessionEnd, trackAtmosphereChange, trackDurationChange, trackSFXChange, trackParentSettingChange, trackActivitySwitch, trackAppUpdate, trackPageView, trackError, trackEngagement, setupEngagementTracking, generateSessionIdentifier } from './analytics.js';
+import { trackSessionStart, trackSessionEnd, trackAtmosphereChange, trackDurationChange, trackSFXChange, trackParentSettingChange, trackActivitySwitch, trackAppUpdate, trackPageView, trackVirtualPageView, trackError, trackEngagement, setupEngagementTracking, generateSessionIdentifier } from './analytics.js';
 
 // =========================================================================
 // PARENT MENU & SETTINGS
