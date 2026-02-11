@@ -136,17 +136,36 @@ export const Sorting = {
             let fx = s.x, fy = s.y;
             if (this.dragBlock !== s) { 
                 // Apply behavior pattern to floating
-                let isRhythm = AppState.behaviorPattern === 'rhythm' || 
-                    (AppState.behaviorPattern === 'mix' && Math.random() > 0.3);
-                
-                if (isRhythm && timePhase !== null) {
+                if (AppState.behaviorPattern === 'chaos') {
+                    // Chaotic floating - unpredictable, erratic movement
+                    let chaosPhase = Date.now() * 0.002 * CONFIG.CHAOS_SPEED_MULTIPLIER;
+                    let randomOffset = Math.sin(Date.now() * 0.003 + s.phase) * 0.5 + 0.5; // 0-1 variation
+                    fx += Math.sin(chaosPhase + s.dx + randomOffset * Math.PI) * CONFIG.SORTING_FLOAT_AMPLITUDE * CONFIG.CHAOS_AMPLITUDE_MULTIPLIER;
+                    fy += Math.cos(chaosPhase * 1.3 + s.dy + randomOffset * Math.PI * 0.7) * CONFIG.SORTING_FLOAT_AMPLITUDE * CONFIG.CHAOS_AMPLITUDE_MULTIPLIER;
+                } else if (AppState.behaviorPattern === 'rhythm') {
                     // Rhythmic, predictable floating
-                    fx += Math.sin(timePhase + s.phase) * CONFIG.SORTING_FLOAT_AMPLITUDE;
-                    fy += Math.cos(timePhase + s.phase) * CONFIG.SORTING_FLOAT_AMPLITUDE;
+                    if (timePhase !== null) {
+                        fx += Math.sin(timePhase + s.phase) * CONFIG.SORTING_FLOAT_AMPLITUDE;
+                        fy += Math.cos(timePhase + s.phase) * CONFIG.SORTING_FLOAT_AMPLITUDE;
+                    }
+                } else if (AppState.behaviorPattern === 'mix') {
+                    // Alternate smoothly between rhythm and calm based on time
+                    let cycleProgress = (Date.now() % CONFIG.MIX_PATTERN_CYCLE_TIME) / CONFIG.MIX_PATTERN_CYCLE_TIME;
+                    if (cycleProgress < 0.6 && timePhase !== null) {
+                        // Rhythmic period (60% of time)
+                        fx += Math.sin(timePhase + s.phase) * CONFIG.SORTING_FLOAT_AMPLITUDE;
+                        fy += Math.cos(timePhase + s.phase) * CONFIG.SORTING_FLOAT_AMPLITUDE;
+                    } else {
+                        // Calm period (40% of time)
+                        let calmPhase = Date.now() * 0.0005;
+                        fx += Math.sin(calmPhase + s.dx) * CONFIG.SORTING_FLOAT_AMPLITUDE * 0.3;
+                        fy += Math.cos(calmPhase + s.dy) * CONFIG.SORTING_FLOAT_AMPLITUDE * 0.3;
+                    }
                 } else {
-                    // Chaotic floating
-                    fx += Math.sin(Date.now() * 0.001 + s.dx) * CONFIG.SORTING_FLOAT_AMPLITUDE; 
-                    fy += Math.cos(Date.now() * 0.001 + s.dy) * CONFIG.SORTING_FLOAT_AMPLITUDE;
+                    // Default calm floating
+                    let calmPhase = Date.now() * 0.0005;
+                    fx += Math.sin(calmPhase + s.dx) * CONFIG.SORTING_FLOAT_AMPLITUDE * 0.3;
+                    fy += Math.cos(calmPhase + s.dy) * CONFIG.SORTING_FLOAT_AMPLITUDE * 0.3;
                 }
                 s.scale += (1.0 - s.scale) * 0.2; 
             } else { 

@@ -56,6 +56,11 @@ export const CONFIG = {
     // Rhythm mode settings
     RHYTHM_MODE_AMPLITUDE: 0.5,
     RHYTHM_MODE_SPEED: 0.001,
+    // Mix mode settings
+    MIX_PATTERN_CYCLE_TIME: 5000, // Time to alternate between rhythm and calm
+    // Chaos mode settings
+    CHAOS_AMPLITUDE_MULTIPLIER: 1.5, // Chaos is more intense than rhythm
+    CHAOS_SPEED_MULTIPLIER: 2.0, // Chaos moves faster
     // Liquid view enhancements
     LIQUID_MAX_DROPS: 12, // Increased for more visible activity
     LIQUID_DROP_LIFETIME: 8000,
