@@ -415,16 +415,30 @@ export function trackPerformance(metric, value) {
 }
 
 /**
- * Track atmosphere effectiveness
+ * Track atmosphere effectiveness for optimization
  */
 export function trackAtmosphereEffectiveness(atmosphere, sessionDuration, completed) {
     if (typeof gtag === 'undefined') return;
     
     gtag('event', 'atmosphere_effectiveness', {
-        atmosphere_type: atmosphere,
-        avg_session_length: sessionDuration.toString(),
-        completion_rate: completed ? 'high' : 'lower',
-        device_type: isMobile() ? 'mobile' : 'desktop'
+        atmosphere: atmosphere,
+        session_duration: sessionDuration,
+        session_completed: completed,
+        device_type: getDeviceInfo().device_type
+    });
+}
+
+/**
+ * Track application errors
+ */
+export function trackError(error, context = '') {
+    if (typeof gtag === 'undefined') return;
+    
+    gtag('event', 'app_error', {
+        error_message: error.message || error,
+        error_context: context,
+        device_type: getDeviceInfo().device_type,
+        browser: getDeviceInfo().browser
     });
 }
 
