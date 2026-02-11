@@ -13,7 +13,7 @@ import { Bubbles } from './views/bubbles.js';
 import { Liquid } from './views/liquid.js';
 import { Marbles } from './views/marbles.js';
 import { initAdminMode, toggleAdminOverlay, adminForceSunset } from './admin.js';
-import { trackSessionStart, trackSessionEnd, trackAtmosphereChange, trackDurationChange, trackSFXChange, trackParentSettingChange, trackActivitySwitch, trackAppUpdate, trackPageView, trackError, trackEngagement, setupEngagementTracking } from './analytics.js';
+import { trackSessionStart, trackSessionEnd, trackAtmosphereChange, trackDurationChange, trackSFXChange, trackParentSettingChange, trackActivitySwitch, trackAppUpdate, trackPageView, trackError, trackEngagement, setupEngagementTracking, generateSessionIdentifier } from './analytics.js';
 
 // =========================================================================
 // PARENT MENU & SETTINGS
@@ -446,8 +446,10 @@ function initApp() {
         AppState.duration = AppState.sessionMinutes; // Set for analytics
         AppState.soundType = AppState.currentSound; // Set for analytics
         
-        // Track session start
-        trackSessionStart();
+        // Generate session identifier and track session start
+        const sessionIdentifier = generateSessionIdentifier();
+        AppState.sessionIdentifier = sessionIdentifier; // Store for reference
+        trackSessionStart(sessionIdentifier);
         
         AudioEngine.init();
         animate();

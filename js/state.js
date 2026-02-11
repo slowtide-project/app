@@ -20,7 +20,9 @@ export const AppState = {
     behaviorPattern: 'chaos',
     autoSwitchMode: 'on',
     visualDensity: 'standard',
-    emergentEvents: 'off'
+    emergentEvents: 'off',
+    // Session tracking
+    sessionIdentifier: null
 };
 
 /** Audio system state variables */

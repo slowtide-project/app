@@ -7,14 +7,26 @@ import { AppState } from './state.js';
 import { CONFIG } from './config.js';
 
 /**
- * Track session start with selected settings
+ * Track session start with comprehensive device and settings data
+ * @param {string} sessionIdentifier - Unique identifier for this session
  */
-export async function trackSessionStart() {
+export async function trackSessionStart(sessionIdentifier = null) {
     if (typeof gtag === 'undefined') return;
     
     const deviceInfo = getDeviceInfo();
     
+    // If we have a session identifier, set user_id for this session
+    if (sessionIdentifier) {
+        gtag('config', 'G-TJX61DSDD8', {
+            user_id: sessionIdentifier,
+            anonymize_ip: true,
+            allow_google_signals: false,
+            allow_ad_personalization_signals: false
+        });
+    }
+    
     gtag('event', 'session_start', {
+        session_identifier: sessionIdentifier,
         duration_selected: AppState.duration.toString(),
         atmosphere: AppState.soundType,
         sfx_enabled: AppState.sfxEnabled.toString(),
@@ -407,14 +419,41 @@ export function trackAtmosphereEffectiveness(atmosphere, sessionDuration, comple
 }
 
 /**
- * Track errors (non-PII only)
+ * Generate a three-word identifier for session tracking with date anchor
+ * @returns {string} Three random words joined by hyphens with date suffix
  */
-export function trackError(errorType, context = '') {
+export function generateSessionIdentifier() {
+    const words = [
+        'apple', 'ocean', 'mountain', 'river', 'forest', 'sunset', 'moon', 'star', 
+        'cloud', 'wind', 'rain', 'snow', 'fire', 'earth', 'stone', 'crystal',
+        'dream', 'whisper', 'echo', 'shadow', 'light', 'dawn', 'dusk', 'night',
+        'morning', 'spring', 'summer', 'autumn', 'winter', 'breeze', 'thunder',
+        'lightning', 'rainbow', 'mist', 'fog', 'valley', 'meadow', 'garden',
+        'cottage', 'bridge', 'path', 'journey', 'adventure', 'wonder', 'magic'
+    ];
+    
+    const getRandomWord = () => words[Math.floor(Math.random() * words.length)];
+    
+    // Add simple date/time anchor (MMdd-HHMM format)
+    const now = new Date();
+    const monthDay = String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0');
+    const hourMin = String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0');
+    const dateAnchor = monthDay + '-' + hourMin;
+    
+    return `${getRandomWord()}-${getRandomWord()}-${getRandomWord()}-${dateAnchor}`;
+}
+
+/**
+ * Setup analytics configuration
+ */
+export function setupAnalytics() {
     if (typeof gtag === 'undefined') return;
     
-    gtag('event', 'app_error', {
-        error_type: errorType,
-        context: context.substring(0, 100), // Limit context length
-        device_type: isMobile() ? 'mobile' : 'desktop'
+    gtag('config', 'G-TJX61DSDD8', {
+        anonymize_ip: true,
+        allow_google_signals: false,
+        allow_ad_personalization_signals: false
     });
+    
+    trackPageView('Start Screen');
 }
