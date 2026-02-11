@@ -58,6 +58,11 @@ self.addEventListener('activate', (event) => {
 
 // Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
+    // Only handle HTTP/HTTPS requests
+    if (!event.request.url.startsWith('http')) {
+        return;
+    }
+    
     event.respondWith(
         caches.match(event.request)
             .then((response) => {
@@ -80,11 +85,13 @@ self.addEventListener('fetch', (event) => {
                         // Clone the response
                         const responseToCache = response.clone();
 
-                        // Cache successful responses
-                        caches.open(CACHE_NAME)
-                            .then((cache) => {
-                                cache.put(event.request, responseToCache);
-                            });
+                        // Cache successful responses (only for HTTP/HTTPS requests)
+                        if (event.request.url.startsWith('http')) {
+                            caches.open(CACHE_NAME)
+                                .then((cache) => {
+                                    cache.put(event.request, responseToCache);
+                                });
+                        }
 
                         return response;
                     })
