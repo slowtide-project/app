@@ -227,10 +227,18 @@ function closeQuitConfirm() {
 function performUpdate() { 
     trackAppUpdate();
     
-    // Force cache bypass by adding timestamp
+    // Force complete cache bypass
+    if ('caches' in window) {
+        caches.keys().then(function(names) {
+            names.forEach(function(name) {
+                caches.delete(name);
+            });
+        });
+    }
+    
+    // Hard refresh with cache busting
     const timestamp = new Date().getTime();
-    const url = window.location.href.split('?')[0] + '?v=' + timestamp;
-    window.location.href = url;
+    window.location.href = window.location.origin + window.location.pathname + '?v=' + timestamp;
 }
 
 /**
