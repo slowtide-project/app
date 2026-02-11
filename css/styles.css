@@ -233,6 +233,15 @@ canvas {
     border: 1px solid #e74c3c;
 }
 
+.cancel-btn {
+    background: #666;
+    color: white;
+}
+
+.cancel-btn:hover {
+    background: #555;
+}
+
 .update-confirm-btn {
     background: #4a90e2;
     color: white;
