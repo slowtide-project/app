@@ -6,6 +6,7 @@ import { Bubbles } from './views/bubbles.js';
 import { Liquid } from './views/liquid.js';
 import { Sorting } from './views/sorting.js';
 import { Marbles } from './views/marbles.js';
+import { trackActivitySwitch, trackSessionEnd } from './analytics.js';
 
 /** Session timer management */
 export const Timer = {
@@ -82,7 +83,14 @@ export const Timer = {
         const totalSeconds = AppState.sessionMinutes * 60;
         const elapsed = this.getCurrentElapsed();
         let progress = elapsed / totalSeconds;
-        if (progress > 1) progress = 1;
+        if (progress > 1) {
+            progress = 1;
+            // Track session completion when timer expires
+            if (AppState.isSessionRunning) {
+                trackSessionEnd(true); // Session completed successfully
+                AppState.isSessionRunning = false; // Prevent multiple tracking
+            }
+        }
         if (progress > CONFIG.SUNSET_FADE_START_RATIO) {
             const fade = (progress - CONFIG.SUNSET_FADE_START_RATIO) * 2;
             DOM.sunsetOverlay.style.opacity = fade * 0.98;
@@ -181,6 +189,7 @@ export const ViewManager = {
      * @param {string} viewName - View name from VIEWS
      */
     switchView(viewName) {
+        const previousView = AppState.currentView;
         AppState.currentView = viewName;
         document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
         const btn = document.getElementById(`btn-${viewName}`);
@@ -189,5 +198,10 @@ export const ViewManager = {
         
         const initHandler = ViewInitHandlers[viewName];
         if (initHandler) initHandler();
+        
+        // Track activity switch (but not for initial random selection)
+        if (AppState.isSessionRunning && previousView !== undefined) {
+            trackActivitySwitch(viewName);
+        }
     }
 };

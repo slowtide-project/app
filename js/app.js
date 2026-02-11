@@ -13,6 +13,7 @@ import { Bubbles } from './views/bubbles.js';
 import { Liquid } from './views/liquid.js';
 import { Marbles } from './views/marbles.js';
 import { initAdminMode, toggleAdminOverlay, adminForceSunset } from './admin.js';
+import { trackSessionStart, trackSessionEnd, trackAtmosphereChange, trackDurationChange, trackSFXChange, trackParentSettingChange, trackActivitySwitch, trackAppUpdate, trackPageView, trackError } from './analytics.js';
 
 // =========================================================================
 // PARENT MENU & SETTINGS
@@ -50,6 +51,7 @@ function handleTitleTap() {
  * @param {number} mins - Duration in minutes
  */
 function changeDuration(mins) {
+    const oldDuration = AppState.sessionMinutes;
     AppState.sessionMinutes = mins;
     document.querySelectorAll('.time-btn').forEach(b => {
         b.classList.remove('selected');
@@ -57,6 +59,11 @@ function changeDuration(mins) {
     });
     Timer.updateDisplay();
     saveAllPreferences();
+    
+    // Track duration change
+    if (AppState.isSessionRunning) {
+        trackDurationChange(oldDuration, mins);
+    }
 }
 
 /**
@@ -64,6 +71,7 @@ function changeDuration(mins) {
  * @param {string} type - Sound type from SOUND_TYPES
  */
 function changeSound(type) {
+    const oldSound = AppState.currentSound;
     AppState.currentSound = type;
     document.querySelectorAll('.sound-btn').forEach(b => {
         b.classList.remove('selected');
@@ -74,6 +82,11 @@ function changeSound(type) {
         AudioEngine.generateSoundBuffer(type);
     }
     saveAllPreferences();
+    
+    // Track atmosphere change
+    if (AppState.isSessionRunning || oldSound !== type) {
+        trackAtmosphereChange(oldSound, type);
+    }
 }
 
 /**
@@ -87,6 +100,9 @@ function setSFX(val) {
         if (b.getAttribute('data-sfx') === val) b.classList.add('selected');
     });
     saveAllPreferences();
+    
+    // Track SFX change
+    trackSFXChange(AppState.sfxEnabled);
 }
 
 /**
@@ -94,12 +110,16 @@ function setSFX(val) {
  * @param {string} pattern - 'chaos', 'rhythm', or 'mix'
  */
 function changeBehaviorPattern(pattern) {
+    const oldPattern = AppState.behaviorPattern;
     AppState.behaviorPattern = pattern;
     document.querySelectorAll('.pattern-btn').forEach(b => {
         b.classList.remove('selected');
         if (b.getAttribute('data-pattern') === pattern) b.classList.add('selected');
     });
     saveAllPreferences();
+    
+    // Track parent setting change
+    trackParentSettingChange('behavior_pattern', oldPattern || 'chaos', pattern);
 }
 
 /**
@@ -107,12 +127,16 @@ function changeBehaviorPattern(pattern) {
  * @param {string} mode - 'on', 'off', or 'long'
  */
 function changeAutoSwitchMode(mode) {
+    const oldMode = AppState.autoSwitchMode;
     AppState.autoSwitchMode = mode;
     document.querySelectorAll('.switch-btn').forEach(b => {
         b.classList.remove('selected');
         if (b.getAttribute('data-switch') === mode) b.classList.add('selected');
     });
     saveAllPreferences();
+    
+    // Track parent setting change
+    trackParentSettingChange('auto_switch_mode', oldMode || 'on', mode);
 }
 
 /**
@@ -120,6 +144,7 @@ function changeAutoSwitchMode(mode) {
  * @param {string} density - 'minimal', 'standard', or 'rich'
  */
 function changeVisualDensity(density) {
+    const oldDensity = AppState.visualDensity;
     AppState.visualDensity = density;
     document.querySelectorAll('.density-btn').forEach(b => {
         b.classList.remove('selected');
@@ -128,6 +153,9 @@ function changeVisualDensity(density) {
     // Reinitialize current view to apply density change
     ViewManager.switchView(AppState.currentView);
     saveAllPreferences();
+    
+    // Track parent setting change
+    trackParentSettingChange('visual_density', oldDensity || 'standard', density);
 }
 
 /**
@@ -135,12 +163,16 @@ function changeVisualDensity(density) {
  * @param {string} events - 'off', 'rare', or 'common'
  */
 function changeEmergentEvents(events) {
+    const oldEvents = AppState.emergentEvents;
     AppState.emergentEvents = events;
     document.querySelectorAll('.emergent-btn').forEach(b => {
         b.classList.remove('selected');
         if (b.getAttribute('data-emergent') === events) b.classList.add('selected');
     });
     saveAllPreferences();
+    
+    // Track parent setting change
+    trackParentSettingChange('emergent_events', oldEvents || 'off', events);
 }
 
 /**
@@ -176,7 +208,10 @@ function togglePause() {
 function closeSettings() { DOM.settingsModal.style.display = 'none'; }
 function showQuitConfirm() { DOM.settingsModal.style.display = 'none'; DOM.confirmModal.style.display = 'block'; }
 function closeQuitConfirm() { DOM.confirmModal.style.display = 'none'; DOM.settingsModal.style.display = 'block'; }
-function performUpdate() { window.location.reload(); }
+function performUpdate() { 
+    trackAppUpdate();
+    window.location.reload(); 
+}
 
 /**
  * Show advanced options modal from start screen
@@ -206,6 +241,11 @@ function closeAdvancedOptions() {
 
 /** Reset application to start state */
 function resetApp() {
+    // Track session end before resetting
+    if (AppState.isSessionRunning) {
+        trackSessionEnd(false); // Session ended early
+    }
+    
     DOM.confirmModal.style.display = 'none';
     if (AudioState.context) AudioState.context.suspend();
     if (AudioState.noiseSource) try { AudioState.noiseSource.stop(); } catch (e) { }
@@ -355,6 +395,9 @@ function initApp() {
     changeVisualDensity(visualDensity);
     changeEmergentEvents(emergentEvents);
 
+    // Track initial page view
+    trackPageView();
+
     // Begin button click handler
     DOM.beginBtn.addEventListener('click', function () {
         DOM.startScreen.style.display = 'none';
@@ -367,6 +410,12 @@ function initApp() {
         ViewManager.switchView(randomView);
         
         AppState.isSessionRunning = true;
+        AppState.duration = AppState.sessionMinutes; // Set for analytics
+        AppState.soundType = AppState.currentSound; // Set for analytics
+        
+        // Track session start
+        trackSessionStart();
+        
         AudioEngine.init();
         animate();
         Timer.start(true);

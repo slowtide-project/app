@@ -14,6 +14,20 @@
     <link rel="apple-touch-icon" href="assets/icon.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#050505">
+
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TJX61DSDD8"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-TJX61DSDD8', {
+            anonymize_ip: true,
+            allow_google_signals: false,
+            allow_ad_personalization_signals: false
+        });
+    </script>
+
     <link rel="stylesheet" href="css/styles.css">
 </head>
 
@@ -53,10 +67,12 @@
                 <button class="opt-btn sfx-btn" data-sfx="off" onclick="setSFX('off')">OFF</button>
             </div>
 
-            <button class="action-btn close-btn" onclick="showAdvancedOptionsFromSettings()">Advanced Options...</button>
+            <button class="action-btn close-btn" onclick="showAdvancedOptionsFromSettings()">Advanced
+                Options...</button>
 
             <button class="action-btn close-btn" onclick="closeSettings()">Close & Resume</button>
-            <a href="https://buymeacoffee.com/gary.rutland" target="_blank" class="action-btn close-btn" style="display: block; text-decoration: none;">Buy Developer a Coffee</a>
+            <a href="https://buymeacoffee.com/gary.rutland" target="_blank" class="action-btn close-btn"
+                style="display: block; text-decoration: none;">Buy Developer a Coffee</a>
             <button class="action-btn quit-btn" onclick="showQuitConfirm()">End Session</button>
         </div>
 
@@ -64,8 +80,7 @@
             <h2>End Session?</h2>
             <p>This will stop the audio and return to the Start Screen.</p>
             <div class="flex-row">
-                <button class="action-btn close-btn flex-1 mt-0 mb-0"
-                    onclick="closeQuitConfirm()">Cancel</button>
+                <button class="action-btn close-btn flex-1 mt-0 mb-0" onclick="closeQuitConfirm()">Cancel</button>
                 <button class="action-btn quit-btn flex-1 mt-0" onclick="resetApp()">End
                     Session</button>
             </div>
@@ -77,30 +92,41 @@
 
             <div class="setting-row">
                 <span class="setting-label">Behavior Pattern</span>
-                <button class="opt-btn pattern-btn selected" data-pattern="chaos" onclick="changeBehaviorPattern('chaos')">Chaos</button>
-                <button class="opt-btn pattern-btn" data-pattern="rhythm" onclick="changeBehaviorPattern('rhythm')">Rhythm</button>
-                <button class="opt-btn pattern-btn" data-pattern="mix" onclick="changeBehaviorPattern('mix')">Mix</button>
+                <button class="opt-btn pattern-btn selected" data-pattern="chaos"
+                    onclick="changeBehaviorPattern('chaos')">Chaos</button>
+                <button class="opt-btn pattern-btn" data-pattern="rhythm"
+                    onclick="changeBehaviorPattern('rhythm')">Rhythm</button>
+                <button class="opt-btn pattern-btn" data-pattern="mix"
+                    onclick="changeBehaviorPattern('mix')">Mix</button>
             </div>
 
             <div class="setting-row">
                 <span class="setting-label">Auto-Switch Mode</span>
-                <button class="opt-btn switch-btn selected" data-switch="on" onclick="changeAutoSwitchMode('on')">On</button>
+                <button class="opt-btn switch-btn selected" data-switch="on"
+                    onclick="changeAutoSwitchMode('on')">On</button>
                 <button class="opt-btn switch-btn" data-switch="off" onclick="changeAutoSwitchMode('off')">Off</button>
-                <button class="opt-btn switch-btn" data-switch="long" onclick="changeAutoSwitchMode('long')">Long</button>
+                <button class="opt-btn switch-btn" data-switch="long"
+                    onclick="changeAutoSwitchMode('long')">Long</button>
             </div>
 
             <div class="setting-row">
                 <span class="setting-label">Visual Density</span>
-                <button class="opt-btn density-btn" data-density="minimal" onclick="changeVisualDensity('minimal')">Minimal</button>
-                <button class="opt-btn density-btn selected" data-density="standard" onclick="changeVisualDensity('standard')">Standard</button>
-                <button class="opt-btn density-btn" data-density="rich" onclick="changeVisualDensity('rich')">Rich</button>
+                <button class="opt-btn density-btn" data-density="minimal"
+                    onclick="changeVisualDensity('minimal')">Minimal</button>
+                <button class="opt-btn density-btn selected" data-density="standard"
+                    onclick="changeVisualDensity('standard')">Standard</button>
+                <button class="opt-btn density-btn" data-density="rich"
+                    onclick="changeVisualDensity('rich')">Rich</button>
             </div>
 
             <div class="setting-row">
                 <span class="setting-label">Emergent Events</span>
-                <button class="opt-btn emergent-btn selected" data-emergent="off" onclick="changeEmergentEvents('off')">Off</button>
-                <button class="opt-btn emergent-btn" data-emergent="rare" onclick="changeEmergentEvents('rare')">Rare</button>
-                <button class="opt-btn emergent-btn" data-emergent="common" onclick="changeEmergentEvents('common')">Common</button>
+                <button class="opt-btn emergent-btn selected" data-emergent="off"
+                    onclick="changeEmergentEvents('off')">Off</button>
+                <button class="opt-btn emergent-btn" data-emergent="rare"
+                    onclick="changeEmergentEvents('rare')">Rare</button>
+                <button class="opt-btn emergent-btn" data-emergent="common"
+                    onclick="changeEmergentEvents('common')">Common</button>
             </div>
 
             <button class="action-btn close-btn mt-20" onclick="closeAdvancedOptions()">Done</button>
@@ -114,8 +140,7 @@
             <div class="flex-row">
                 <button class="action-btn close-btn flex-1 mt-0 mb-0"
                     onclick="document.getElementById('update-modal').style.display='none'">Cancel</button>
-                <button class="action-btn update-confirm-btn flex-1 mt-0"
-                    onclick="performUpdate()">Update Now</button>
+                <button class="action-btn update-confirm-btn flex-1 mt-0" onclick="performUpdate()">Update Now</button>
             </div>
         </div>
 
@@ -176,8 +201,7 @@
             <div class="picker-section">
                 <p class="picker-label">Atmosphere</p>
                 <div class="start-opt-row">
-                    <button class="start-btn sound-btn" data-sound="deep"
-                        onclick="changeSound('deep')">Deep</button>
+                    <button class="start-btn sound-btn" data-sound="deep" onclick="changeSound('deep')">Deep</button>
                     <button class="start-btn sound-btn" data-sound="rain" onclick="changeSound('rain')">Rain</button>
                 </div>
                 <div class="start-opt-row">
@@ -205,12 +229,14 @@
             <div class="nav-btn" id="btn-sorting" onclick="switchView('sorting')" ontouchstart="switchView('sorting')">
                 <svg viewBox="0 0 24 24">
                     <path d="M3 3H11V11H3V3ZM13 3H21V11H13V3ZM3 13H11V21H3V13ZM13 13H21V21H13V13Z" />
-                </svg></div>
+                </svg>
+            </div>
             <div class="nav-btn" id="btn-bubbles" onclick="switchView('bubbles')" ontouchstart="switchView('bubbles')">
                 <svg viewBox="0 0 24 24">
                     <path
                         d="M12,2C6.48,2 2,6.48 2,12C2,17.52 6.48,22 12,22C17.52,22 22,17.52 22,12C22,6.48 17.52,2 12,2M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M13,7H11V11H7V13H11V17H13V13H17V11H13V7Z" />
-                </svg></div>
+                </svg>
+            </div>
             <div class="nav-btn" id="btn-liquid" onclick="switchView('liquid')" ontouchstart="switchView('liquid')"><svg
                     viewBox="0 0 24 24">
                     <path
@@ -220,7 +246,8 @@
                 <svg viewBox="0 0 24 24">
                     <path
                         d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-5 10c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm10 0c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm-5 7c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z" />
-                </svg></div>
+                </svg>
+            </div>
         </div>
 
         <div id="view-container">
