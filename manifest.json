@@ -2,21 +2,21 @@
   "name": "Slowtide",
   "short_name": "Slowtide",
   "description": "A calming interactive app for children to wind down",
-  "start_url": "/",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#050505",
   "theme_color": "#050505",
   "orientation": "any",
-  "scope": "/",
+  "scope": "./",
   "icons": [
     {
-      "src": "assets/icon.png",
+      "src": "./assets/icon.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "assets/icon.png",
+      "src": "./assets/icon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

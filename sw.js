@@ -4,23 +4,24 @@
 
 const CACHE_NAME = 'slowtide-v1';
 const STATIC_ASSETS = [
-    '/',
-    '/index.html',
-    '/css/styles.css',
-    '/assets/icon.png',
-    '/js/app.js',
-    '/js/config.js',
-    '/js/state.js',
-    '/js/audio.js',
-    '/js/systems.js',
-    '/js/storage.js',
-    '/js/utils.js',
-    '/js/admin.js',
-    '/js/views/particles.js',
-    '/js/views/sorting.js',
-    '/js/views/bubbles.js',
-    '/js/views/liquid.js',
-    '/js/views/marbles.js'
+    './',
+    './index.html',
+    './css/styles.css',
+    './assets/icon.png',
+    './js/app.js',
+    './js/config.js',
+    './js/state.js',
+    './js/audio.js',
+    './js/systems.js',
+    './js/storage.js',
+    './js/utils.js',
+    './js/admin.js',
+    './js/analytics.js',
+    './js/views/particles.js',
+    './js/views/sorting.js',
+    './js/views/bubbles.js',
+    './js/views/liquid.js',
+    './js/views/marbles.js'
 ];
 
 // Install event - cache all static assets
@@ -90,7 +91,7 @@ self.addEventListener('fetch', (event) => {
                     .catch(() => {
                         // If network fails, try to serve cached index.html for navigation requests
                         if (event.request.mode === 'navigate') {
-                            return caches.match('/index.html');
+                            return caches.match('./index.html');
                         }
                     });
             })
