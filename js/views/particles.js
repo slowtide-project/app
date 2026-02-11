@@ -217,6 +217,16 @@ export const Particles = {
         DOM.ctx.fillStyle = `rgba(5,5,5,${CONFIG.CANVAS_FADE_ALPHA})`;
         DOM.ctx.fillRect(0, 0, DOM.canvas.width, DOM.canvas.height);
         
+        // Auto-spawn particles in chaos mode to maintain activity
+        if (AppState.behaviorPattern === 'chaos' && AppState.entities.length < 20) {
+            if (Math.random() < 0.1) { // 10% chance per frame
+                this.spawn(
+                    Math.random() * DOM.canvas.width,
+                    Math.random() * DOM.canvas.height
+                );
+            }
+        }
+        
         // Calculate time-based rhythm phase
         let timePhase = (AppState.behaviorPattern === 'rhythm' || AppState.behaviorPattern === 'mix') ? 
             Date.now() * CONFIG.RHYTHM_MODE_SPEED : null;
@@ -235,16 +245,35 @@ export const Particles = {
             }
             
             // Apply behavior patterns
-            if (timePhase !== null) {
-                let isRhythm = AppState.behaviorPattern === 'rhythm' || 
-                    (AppState.behaviorPattern === 'mix' && Math.random() > 0.3);
-                
-                if (isRhythm) {
+            if (AppState.behaviorPattern === 'chaos') {
+                // Chaotic movement - strong random forces and erratic changes
+                let chaosIntensity = 0.4;
+                p.vx += (Math.random() - 0.5) * chaosIntensity;
+                p.vy += (Math.random() - 0.5) * chaosIntensity;
+                // Add occasional sudden direction changes
+                if (Math.random() < 0.02) {
+                    p.vx = (Math.random() - 0.5) * 5;
+                    p.vy = (Math.random() - 0.5) * 5;
+                }
+            } else if (timePhase !== null) {
+                if (AppState.behaviorPattern === 'rhythm') {
                     // Rhythmic flowing movement
                     p.vx += Math.sin(timePhase + i) * 0.1;
                     p.vy += Math.cos(timePhase * 1.5 + i) * 0.1;
+                } else if (AppState.behaviorPattern === 'mix') {
+                    // Mix mode - alternate between rhythm and calm
+                    let cycleProgress = (Date.now() % CONFIG.MIX_PATTERN_CYCLE_TIME) / CONFIG.MIX_PATTERN_CYCLE_TIME;
+                    if (cycleProgress < 0.6) {
+                        // Rhythmic period
+                        p.vx += Math.sin(timePhase + i) * 0.1;
+                        p.vy += Math.cos(timePhase * 1.5 + i) * 0.1;
+                    } else {
+                        // Calm period
+                        p.vx += (Math.random() - 0.5) * 0.1;
+                        p.vy += (Math.random() - 0.5) * 0.1;
+                    }
                 } else {
-                    // Gentle floating
+                    // Default gentle floating
                     p.vx += (Math.random() - 0.5) * 0.2;
                     p.vy += (Math.random() - 0.5) * 0.2;
                 }
