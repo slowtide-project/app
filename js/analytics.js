@@ -139,6 +139,33 @@ export function trackPageView() {
 }
 
 /**
+ * Track user engagement to keep session active
+ */
+export function trackEngagement(activity = 'app_open') {
+    if (typeof gtag === 'undefined') return;
+    
+    gtag('event', 'user_engagement', {
+        activity: activity,
+        device_type: isMobile() ? 'mobile' : 'desktop'
+    });
+}
+
+/**
+ * Setup engagement tracking interval
+ */
+export function setupEngagementTracking() {
+    // Send engagement event every 30 seconds to keep session active
+    setInterval(() => {
+        if (AppState.isSessionRunning) {
+            trackEngagement('session_active');
+        }
+    }, 30000);
+    
+    // Track initial app load
+    setTimeout(() => trackEngagement('app_loaded'), 1000);
+}
+
+/**
  * Track errors (non-PII only)
  */
 export function trackError(errorType, context = '') {

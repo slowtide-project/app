@@ -308,7 +308,7 @@ const InputManager = {
     },
 
     /**
-     * Handle end of input (mouse up, touch end, etc)
+     * Handle input for the app
      */
     handleInput(e, type) {
         if (type === 'end') {
@@ -324,6 +324,12 @@ const InputManager = {
         const x = t.clientX; const y = t.clientY;
 
         AppState.lastInteraction = Date.now();
+        
+        // Track user interaction as engagement
+        if (AppState.isSessionRunning) {
+            trackEngagement('user_interaction');
+        }
+        
         const yRatio = y / DOM.canvas.height;
 
         const handler = ViewInputHandlers[AppState.currentView];
@@ -397,6 +403,9 @@ function initApp() {
 
     // Track initial page view
     trackPageView();
+    
+    // Setup engagement tracking
+    setupEngagementTracking();
 
     // Begin button click handler
     DOM.beginBtn.addEventListener('click', function () {

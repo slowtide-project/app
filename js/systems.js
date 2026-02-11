@@ -6,7 +6,7 @@ import { Bubbles } from './views/bubbles.js';
 import { Liquid } from './views/liquid.js';
 import { Sorting } from './views/sorting.js';
 import { Marbles } from './views/marbles.js';
-import { trackActivitySwitch, trackSessionEnd } from './analytics.js';
+import { trackActivitySwitch, trackSessionEnd, trackEngagement } from './analytics.js';
 
 /** Session timer management */
 export const Timer = {
@@ -141,6 +141,8 @@ export const IdleManager = {
         let idleTime = Date.now() - AppState.lastInteraction;
         if (idleTime > CONFIG.GHOST_INTERACTION_TIME && Math.random() < CONFIG.IDLE_INTERACTION_CHANCE) {
             this.ghostInteraction();
+            // Track ghost interaction as engagement
+            trackEngagement('ghost_interaction');
         }
         
         // Auto-switch logic based on parent setting
@@ -149,6 +151,7 @@ export const IdleManager = {
                 CONFIG.IDLE_VIEW_SWITCH_TIME_LONG : CONFIG.IDLE_VIEW_SWITCH_TIME;
             if (idleTime > switchTime) {
                 this.switchToRandomView();
+                trackEngagement('auto_switch');
             }
         }
     },
