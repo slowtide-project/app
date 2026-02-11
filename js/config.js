@@ -63,6 +63,20 @@ export const CONFIG = {
     LIQUID_RIPPLE_LIFETIME: 3000,
     // LIQUID_GRAVITY_STRENGTH: 0.3, // Removed - no gravity
     // LIQUID_POOL_Y_FACTOR: 0.8,    // Removed - no pooling
+    // Particle view enhancements
+    PARTICLE_TYPES: {
+        NORMAL: 'normal',
+        GOLDEN: 'golden',
+        RAINBOW: 'rainbow',
+        STAR: 'star'
+    },
+    PARTICLE_GOLDEN_CHANCE: 0.15,
+    PARTICLE_RAINBOW_CHANCE: 0.1,
+    PARTICLE_STAR_CHANCE: 0.05,
+    PARTICLE_TRAIL_LENGTH: 8,
+    PARTICLE_CONNECTION_DISTANCE: 80,
+    PARTICLE_BURST_COUNT: 6,
+    PARTICLE_GLOW_RADIUS: 20
 };
 
 export const SOUND_TYPES = {
