@@ -168,6 +168,68 @@ if (AppState.yourSetting === 'option1') {
 
 ---
 
+## 🔧 Sensory Dimmer System
+
+**When to use**: Modifying progressive engagement phases or intensity settings
+
+**Agent**: General Purpose
+**Files to modify**:
+- `js/config.js` - Add new phase ratios or intensity multipliers
+- `js/sensory-dimmer.js` - Core dimmer logic and phase transitions
+- `js/views/[view].js` - Add high-intensity mode support to views
+- `js/audio.js` - Adjust volume and SFX for different phases
+- `index.html` - Add UI controls if needed
+
+**Pattern to follow**:
+
+**1. Add high-intensity settings to config.js:**
+```javascript
+// High-intensity mode settings
+HIGH_INTENSITY_PARTICLE_GOLDEN_CHANCE: 0.4,
+HIGH_INTENSITY_VOLUME: 0.8,
+HIGH_INTENSITY_SPEED_MULTIPLIER: 3.0,
+```
+
+**2. Check for high-intensity mode in views:**
+```javascript
+const isHighIntensity = AppState.sensoryDimmerMode !== 'off' && 
+    AppState.currentEngagementPhase === 'high';
+
+// Apply high-intensity behavior
+if (isHighIntensity) {
+    // Use enhanced settings
+    const chance = CONFIG.HIGH_INTENSITY_PARTICLE_GOLDEN_CHANCE;
+    const speed = baseSpeed * CONFIG.HIGH_INTENSITY_SPEED_MULTIPLIER;
+}
+```
+
+**3. Phase-based behavior:**
+```javascript
+// Get current phase multipliers
+const multipliers = SensoryDimmer.getPhaseMultipliers();
+const volume = baseVolume * multipliers.volume;
+const speed = baseSpeed * multipliers.speed;
+```
+
+**Phase System:**
+- **High Phase** (33% of session): Maximum stimulation, chaos mode, bright effects
+- **Medium Phase** (33% of session): Moderate stimulation, rhythm mode, fewer effects  
+- **Low Phase** (34% of session): Calm stimulation, calm mode, minimal effects
+
+**High-Intensity Features by View:**
+- **Particles**: 4x spawn rate, rainbow/golden particles, screen flashes, connections
+- **Bubbles**: 120 bubbles, 2.5x speed, glow effects, 16 particle explosions
+- **Liquid**: 8 orbiting drops, rainbow trails, flash effects, constant ripples
+- **Sorting**: 30 blocks, 2.5x speed, glow effects, expanded color palette
+- **Marbles**: 80 marbles, 2x speed, rainbow marbles, enhanced collisions
+
+**Parent Configuration:**
+- Sensory Dimmer setting in Advanced Options (Auto/Off)
+- Auto mode: Progressive phase transitions based on session duration
+- Off mode: Manual control through existing behavior pattern settings
+
+---
+
 ## 🐛 Debugging Issues
 
 **When to use**: Runtime errors, unexpected behavior
@@ -308,6 +370,7 @@ update() {
 │   ├── storage.js      # LocalStorage utilities
 │   ├── audio.js        # Audio engine and sound effects
 │   ├── systems.js      # Timer, idle manager, view manager
+│   ├── sensory-dimmer.js # Sensory dimmer system
 │   ├── admin.js        # Admin/debug overlay
 │   ├── utils.js        # Shared utility functions
 │   └── views/          # Activity view modules
