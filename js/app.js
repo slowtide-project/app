@@ -63,6 +63,11 @@ function changeDuration(mins) {
     // Track duration change
     if (AppState.isSessionRunning) {
         trackDurationChange(oldDuration, mins);
+        trackVirtualPageView('Settings Modal', {
+            setting_type: 'duration_change',
+            old_value: oldDuration,
+            new_value: mins
+        });
     }
 }
 
@@ -205,9 +210,20 @@ function togglePause() {
 /**
  * UI helper functions
  */
-function closeSettings() { DOM.settingsModal.style.display = 'none'; }
-function showQuitConfirm() { DOM.settingsModal.style.display = 'none'; DOM.confirmModal.style.display = 'block'; }
-function closeQuitConfirm() { DOM.confirmModal.style.display = 'none'; DOM.settingsModal.style.display = 'block'; }
+function closeSettings() { 
+    DOM.settingsModal.style.display = 'none';
+    trackVirtualPageView('Main Session');
+}
+function showQuitConfirm() { 
+    DOM.settingsModal.style.display = 'none'; 
+    DOM.confirmModal.style.display = 'block';
+    trackVirtualPageView('Quit Confirmation');
+}
+function closeQuitConfirm() { 
+    DOM.confirmModal.style.display = 'none'; 
+    DOM.settingsModal.style.display = 'block';
+    trackVirtualPageView('Settings Modal');
+}
 function performUpdate() { 
     trackAppUpdate();
     window.location.reload(); 
@@ -218,6 +234,7 @@ function performUpdate() {
  */
 function showAdvancedOptions() {
     DOM.advancedOptionsModal.style.display = 'block';
+    trackVirtualPageView('Advanced Options');
 }
 
 /**
@@ -226,6 +243,7 @@ function showAdvancedOptions() {
 function showAdvancedOptionsFromSettings() {
     DOM.settingsModal.style.display = 'none';
     DOM.advancedOptionsModal.style.display = 'block';
+    trackVirtualPageView('Advanced Options');
 }
 
 /**
@@ -236,6 +254,9 @@ function closeAdvancedOptions() {
     // If we're in a session, show settings modal again
     if (AppState.isSessionRunning) {
         DOM.settingsModal.style.display = 'block';
+        trackVirtualPageView('Settings Modal');
+    } else {
+        trackVirtualPageView('Start Screen');
     }
 }
 
@@ -328,6 +349,9 @@ const InputManager = {
         // Track user interaction as engagement
         if (AppState.isSessionRunning) {
             trackEngagement('user_interaction');
+            if (typeof trackInteraction === 'function') {
+                trackInteraction();
+            }
         }
         
         const yRatio = y / DOM.canvas.height;

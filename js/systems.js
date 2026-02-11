@@ -38,6 +38,11 @@ export const Timer = {
         DOM.pauseBtn.innerText = "Resume Session";
         DOM.pauseBtn.className = "action-btn resume-btn";
         DOM.timerDisplay.innerText += " (PAUSED)";
+        
+        // Track pause behavior
+        if (typeof trackPause === 'function') {
+            trackPause(true);
+        }
     },
 
     /**
@@ -49,6 +54,11 @@ export const Timer = {
         if (AudioState.context) AudioState.context.resume();
         DOM.pauseBtn.innerText = "Pause Session";
         DOM.pauseBtn.className = "action-btn pause-btn";
+        
+        // Track resume behavior
+        if (typeof trackPause === 'function') {
+            trackPause(false);
+        }
     },
 
     /**
@@ -205,6 +215,20 @@ export const ViewManager = {
         // Track activity switch (but not for initial random selection)
         if (AppState.isSessionRunning && previousView !== undefined) {
             trackActivitySwitch(viewName);
+        } else if (AppState.isSessionRunning) {
+            // Track initial activity selection as page view
+            const activityTitles = {
+                'particles': 'Particles Activity',
+                'sorting': 'Sorting Activity', 
+                'bubbles': 'Bubbles Activity',
+                'liquid': 'Liquid Activity',
+                'marbles': 'Marbles Activity'
+            };
+            const activityTitle = activityTitles[viewName] || viewName;
+            trackVirtualPageView(activityTitle, {
+                activity_name: viewName,
+                transition_type: 'session_start'
+            });
         }
     }
 };
