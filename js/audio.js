@@ -28,7 +28,10 @@ export const AudioEngine = {
             AudioState.gainNode.gain.value = 0; 
             return; 
         } else { 
-            AudioState.gainNode.gain.value = CONFIG.ATMOSPHERE_VOLUME; 
+            const isHighIntensity = AppState.sensoryDimmerMode !== 'off' && 
+                AppState.currentEngagementPhase === 'high';
+            const volume = isHighIntensity ? CONFIG.HIGH_INTENSITY_VOLUME : CONFIG.ATMOSPHERE_VOLUME;
+            AudioState.gainNode.gain.value = volume; 
         }
 
         const bufferSize = AudioState.context.sampleRate * 2;
@@ -160,6 +163,15 @@ export const SFX = {
     play(type) {
         if (!AudioState.context || !AppState.sfxEnabled) return;
         if (AudioState.context.state === 'suspended') AudioState.context.resume();
+        
+        const isHighIntensity = AppState.sensoryDimmerMode !== 'off' && 
+            AppState.currentEngagementPhase === 'high';
+        
+        // In high intensity mode, play SFX more frequently and randomly
+        if (isHighIntensity && Math.random() < CONFIG.HIGH_INTENSITY_SFX_FREQUENCY && type !== 'clack') {
+            type = 'pop'; // Force more pop sounds
+        }
+        
         if (type === 'clack' && Date.now() - AppState.lastSFX < CONFIG.SFX_DEBOUNCE_TIME) return;
         AppState.lastSFX = Date.now();
 
@@ -171,16 +183,20 @@ export const SFX = {
 
         if (type === 'pop') {
             osc.type = 'sine';
-            osc.frequency.setValueAtTime(400, t);
-            osc.frequency.exponentialRampToValueAtTime(100, t + 0.15);
-            gain.gain.setValueAtTime(0.3, t);
+            const baseFreq = isHighIntensity ? 600 : 400;
+            osc.frequency.setValueAtTime(baseFreq, t);
+            osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.25, t + 0.15);
+            const volume = isHighIntensity ? 0.5 : 0.3;
+            gain.gain.setValueAtTime(volume, t);
             gain.gain.exponentialRampToValueAtTime(0.01, t + 0.15);
             osc.start(t); osc.stop(t + 0.15);
         } else if (type === 'clack') {
             osc.type = 'triangle';
-            osc.frequency.setValueAtTime(300 + Math.random() * 100, t);
+            const baseFreq = isHighIntensity ? 450 : 300;
+            osc.frequency.setValueAtTime(baseFreq + Math.random() * 100, t);
             osc.frequency.exponentialRampToValueAtTime(100, t + 0.1);
-            gain.gain.setValueAtTime(0.3, t);
+            const volume = isHighIntensity ? 0.5 : 0.3;
+            gain.gain.setValueAtTime(volume, t);
             gain.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
             osc.start(t); osc.stop(t + 0.1);
         }

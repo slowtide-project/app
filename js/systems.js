@@ -6,6 +6,7 @@ import { Bubbles } from './views/bubbles.js';
 import { Liquid } from './views/liquid.js';
 import { Sorting } from './views/sorting.js';
 import { Marbles } from './views/marbles.js';
+import { SensoryDimmer } from './sensory-dimmer.js';
 import { trackActivitySwitch, trackSessionEnd, trackEngagement } from './analytics.js';
 
 /** Session timer management */
@@ -25,6 +26,7 @@ export const Timer = {
             this.updateDisplay(); 
             this.checkSunset(); 
             IdleManager.checkIdle(); 
+            SensoryDimmer.updatePhase(); 
         }, 1000);
     },
 
@@ -105,7 +107,8 @@ export const Timer = {
             const fade = (progress - CONFIG.SUNSET_FADE_START_RATIO) * 2;
             DOM.sunsetOverlay.style.opacity = fade * 0.98;
             if (AppState.currentSound !== 'off' && AudioState.gainNode) {
-                AudioState.gainNode.gain.value = 0.8 * (1 - fade);
+                const multipliers = SensoryDimmer.getPhaseMultipliers();
+                AudioState.gainNode.gain.value = 0.8 * (1 - fade) * multipliers.volume;
             }
         }
     }

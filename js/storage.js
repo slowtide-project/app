@@ -13,6 +13,7 @@ const STORAGE_KEY = 'slowtide_preferences';
  * @param {string} prefs.autoSwitchMode - Auto switch mode ('on', 'off', 'long')
  * @param {string} prefs.visualDensity - Visual density ('minimal', 'standard', 'rich')
  * @param {string} prefs.emergentEvents - Emergent events ('off', 'rare', 'common')
+ * @param {string} prefs.sensoryDimmerMode - Sensory dimmer mode ('auto', 'off')
  */
 export function savePreferences(prefs) {
     try {

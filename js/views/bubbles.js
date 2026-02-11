@@ -14,15 +14,22 @@ function getDensityMultiplier() {
 
 // 3. BUBBLES VIEW
 export const Bubbles = {
-    /**
-     * Initialize bubble system
-     */
+/**
+ * Initialize bubble system
+ */
     init() {
-        let baseMaxB = Math.min(CONFIG.BUBBLE_MAX_COUNT, 
+        const isHighIntensity = AppState.sensoryDimmerMode !== 'off' && 
+            AppState.currentEngagementPhase === 'high';
+        
+        const maxBubbleCount = isHighIntensity ? CONFIG.HIGH_INTENSITY_BUBBLE_MAX_COUNT : CONFIG.BUBBLE_MAX_COUNT;
+        let baseMaxB = Math.min(maxBubbleCount, 
             Math.max(CONFIG.BUBBLE_MIN_COUNT, 
             Math.floor((DOM.canvas.width * DOM.canvas.height) / CONFIG.CANVAS_AREA_DIVISOR)));
         let maxB = Math.floor(baseMaxB * getDensityMultiplier());
         for (let i = 0; i < maxB; i++) {
+            const colorVariance = isHighIntensity ? CONFIG.HIGH_INTENSITY_BUBBLE_COLOR_VARIANCE : 40;
+            const hasGlow = isHighIntensity && Math.random() < CONFIG.HIGH_INTENSITY_BUBBLE_GLOW_CHANCE;
+            
             AppState.entities.push({
                 type: 'b', 
                 x: Math.random() * DOM.canvas.width, 
@@ -32,7 +39,8 @@ export const Bubbles = {
                 sp: Math.random() * 1.5 + 0.5, 
                 w: Math.random() * Math.PI * 2,
                 wBase: Math.random() * Math.PI * 2, // Base phase for rhythm mode
-                c: `hsla(${Math.random() * 40 + 180},70%,70%,0.3)`
+                c: `hsla(${Math.random() * colorVariance + 180},70%,70%,0.3)`,
+                glow: hasGlow
             });
         }
     },
@@ -41,6 +49,10 @@ export const Bubbles = {
      * Spawn a new bubble
      */
     spawn() { 
+        const isHighIntensity = AppState.sensoryDimmerMode !== 'off' && 
+            AppState.currentEngagementPhase === 'high';
+        const hasGlow = isHighIntensity && Math.random() < CONFIG.HIGH_INTENSITY_BUBBLE_GLOW_CHANCE;
+        
         AppState.entities.push({
             type: 'b', 
             x: Math.random() * DOM.canvas.width, 
@@ -105,11 +117,16 @@ export const Bubbles = {
      * Create particle pop effect
      */
     createPop(x, y, c) { 
-        for (let i = 0; i < 8; i++) {
+        const isHighIntensity = AppState.sensoryDimmerMode !== 'off' && 
+            AppState.currentEngagementPhase === 'high';
+        const particleCount = isHighIntensity ? 16 : 8;
+        const speed = isHighIntensity ? 5 : 3;
+        
+        for (let i = 0; i < particleCount; i++) {
             AppState.entities.push({
                 type: 'p', x, y, 
-                vx: Math.cos(Math.PI * 2 * i / 8) * 3, 
-                vy: Math.sin(Math.PI * 2 * i / 8) * 3, 
+                vx: Math.cos(Math.PI * 2 * i / particleCount) * speed, 
+                vy: Math.sin(Math.PI * 2 * i / particleCount) * speed, 
                 l: 1, 
                 c: c.replace('0.3', '0.8')
             });
@@ -121,12 +138,19 @@ export const Bubbles = {
      */
     update() {
         DOM.ctx.clearRect(0, 0, DOM.canvas.width, DOM.canvas.height);
-        let baseMaxB = Math.min(CONFIG.BUBBLE_MAX_COUNT, 
+        
+        const isHighIntensity = AppState.sensoryDimmerMode !== 'off' && 
+            AppState.currentEngagementPhase === 'high';
+        const maxBubbleCount = isHighIntensity ? CONFIG.HIGH_INTENSITY_BUBBLE_MAX_COUNT : CONFIG.BUBBLE_MAX_COUNT;
+        
+        let baseMaxB = Math.min(maxBubbleCount, 
             Math.max(CONFIG.BUBBLE_MIN_COUNT, 
             Math.floor((DOM.canvas.width * DOM.canvas.height) / CONFIG.CANVAS_AREA_DIVISOR)));
         let maxB = Math.floor(baseMaxB * getDensityMultiplier());
+        
+        const spawnChance = isHighIntensity ? CONFIG.HIGH_INTENSITY_BUBBLE_SPAWN_CHANCE : CONFIG.BUBBLE_SPAWN_CHANCE;
             
-        if (AppState.entities.filter(e => e.type === 'b').length < maxB && Math.random() < CONFIG.BUBBLE_SPAWN_CHANCE) {
+        if (AppState.entities.filter(e => e.type === 'b').length < maxB && Math.random() < spawnChance) {
             this.spawn();
         }
         
@@ -141,7 +165,8 @@ export const Bubbles = {
             let e = AppState.entities[i];
             if (e.type === 'b') {
                 if (e.scale < 1.0) e.scale += 0.05;
-                e.y -= e.sp; 
+                const speedMultiplier = isHighIntensity ? CONFIG.HIGH_INTENSITY_BUBBLE_SPEED_MULTIPLIER : 1;
+                e.y -= e.sp * speedMultiplier; 
                 
                 // Apply behavior pattern to movement
                 let isRhythm = AppState.behaviorPattern === 'rhythm' || 
@@ -149,16 +174,25 @@ export const Bubbles = {
                 
                 if (isRhythm && timePhase !== null) {
                     // Rhythmic, predictable movement
-                    e.x += Math.sin(timePhase + e.wBase) * CONFIG.RHYTHM_MODE_AMPLITUDE;
+                    e.x += Math.sin(timePhase + e.wBase) * CONFIG.RHYTHM_MODE_AMPLITUDE * speedMultiplier;
                 } else {
                     // Chaotic movement
-                    e.x += Math.sin(e.y * 0.01 + e.w) * 0.5;
+                    e.x += Math.sin(e.y * 0.01 + e.w) * 0.5 * speedMultiplier;
                 }
                 
                 DOM.ctx.beginPath(); 
                 DOM.ctx.arc(e.x, e.y, e.s * e.scale, 0, Math.PI * 2); 
                 DOM.ctx.fillStyle = e.c; 
                 DOM.ctx.fill(); 
+                
+                // Add glow effect for high intensity bubbles
+                if (e.glow) {
+                    DOM.ctx.shadowBlur = 20;
+                    DOM.ctx.shadowColor = e.c;
+                    DOM.ctx.fill();
+                    DOM.ctx.shadowBlur = 0;
+                }
+                
                 DOM.ctx.strokeStyle = "rgba(255,255,255,0.4)"; 
                 DOM.ctx.lineWidth = 2; 
                 DOM.ctx.stroke();

@@ -19,14 +19,22 @@ export const Particles = {
      * @param {number} y - Y coordinate
      */
     spawn(x, y) {
+        // Use high-intensity chances if in high engagement phase
+        const isHighIntensity = AppState.sensoryDimmerMode !== 'off' && 
+            AppState.currentEngagementPhase === 'high';
+        
+        const goldenChance = isHighIntensity ? CONFIG.HIGH_INTENSITY_PARTICLE_GOLDEN_CHANCE : CONFIG.PARTICLE_GOLDEN_CHANCE;
+        const rainbowChance = isHighIntensity ? CONFIG.HIGH_INTENSITY_PARTICLE_RAINBOW_CHANCE : CONFIG.PARTICLE_RAINBOW_CHANCE;
+        const starChance = isHighIntensity ? CONFIG.HIGH_INTENSITY_PARTICLE_STAR_CHANCE : CONFIG.PARTICLE_STAR_CHANCE;
+        
         // Determine particle type
         let rand = Math.random();
         let type;
-        if (rand < CONFIG.PARTICLE_STAR_CHANCE) {
+        if (rand < starChance) {
             type = CONFIG.PARTICLE_TYPES.STAR;
-        } else if (rand < CONFIG.PARTICLE_STAR_CHANCE + CONFIG.PARTICLE_RAINBOW_CHANCE) {
+        } else if (rand < starChance + rainbowChance) {
             type = CONFIG.PARTICLE_TYPES.RAINBOW;
-        } else if (rand < CONFIG.PARTICLE_STAR_CHANCE + CONFIG.PARTICLE_RAINBOW_CHANCE + CONFIG.PARTICLE_GOLDEN_CHANCE) {
+        } else if (rand < starChance + rainbowChance + goldenChance) {
             type = CONFIG.PARTICLE_TYPES.GOLDEN;
         } else {
             type = CONFIG.PARTICLE_TYPES.NORMAL;
@@ -48,7 +56,10 @@ export const Particles = {
         AppState.entities.push(particle);
         
         // Create particle burst effect for special types
-        if (type === CONFIG.PARTICLE_TYPES.GOLDEN || type === CONFIG.PARTICLE_TYPES.STAR) {
+        const shouldBurst = (type === CONFIG.PARTICLE_TYPES.GOLDEN || type === CONFIG.PARTICLE_TYPES.STAR) ||
+            (isHighIntensity && Math.random() < CONFIG.HIGH_INTENSITY_PARTICLE_BURST_CHANCE);
+            
+        if (shouldBurst) {
             this.createBurst(x, y);
         }
     },
@@ -79,8 +90,16 @@ export const Particles = {
     checkConnections() {
         if (AppState.emergentEvents === 'off') return;
         
+        const isHighIntensity = AppState.sensoryDimmerMode !== 'off' && 
+            AppState.currentEngagementPhase === 'high';
+        
         let chance = AppState.emergentEvents === 'rare' ? 
             CONFIG.EMERGENT_EVENT_CHANCE_RARE : CONFIG.EMERGENT_EVENT_CHANCE_COMMON;
+        
+        // Boost connection chance in high intensity mode
+        if (isHighIntensity) {
+            chance = Math.max(chance, CONFIG.HIGH_INTENSITY_CONNECTION_CHANCE);
+        }
         
         if (Math.random() >= chance) return;
         
@@ -218,8 +237,15 @@ export const Particles = {
         DOM.ctx.fillRect(0, 0, DOM.canvas.width, DOM.canvas.height);
         
         // Auto-spawn particles in chaos mode to maintain activity
-        if (AppState.behaviorPattern === 'chaos' && AppState.entities.length < 20) {
-            if (Math.random() < 0.1) { // 10% chance per frame
+        if (AppState.behaviorPattern === 'chaos' && AppState.entities.length < 30) {
+            // Get spawn multiplier from sensory dimmer
+            const spawnMultiplier = AppState.sensoryDimmerMode !== 'off' ? 
+                window.SensoryDimmer?.getPhaseMultipliers()?.spawn || 1 : 1;
+            const isHighIntensity = AppState.sensoryDimmerMode !== 'off' && 
+                AppState.currentEngagementPhase === 'high';
+            const baseChance = isHighIntensity ? 0.3 : 0.1;
+            
+            if (Math.random() < baseChance * spawnMultiplier) { // Adjusted chance per frame
                 this.spawn(
                     Math.random() * DOM.canvas.width,
                     Math.random() * DOM.canvas.height
@@ -231,8 +257,15 @@ export const Particles = {
         let timePhase = (AppState.behaviorPattern === 'rhythm' || AppState.behaviorPattern === 'mix') ? 
             Date.now() * CONFIG.RHYTHM_MODE_SPEED : null;
         
-        // Check for emergent connections
+        // Check for emergent connections and high-intensity effects
         this.checkConnections();
+        
+        // High-intensity flash effects
+        const isHighIntensity = AppState.sensoryDimmerMode !== 'off' && 
+            AppState.currentEngagementPhase === 'high';
+        if (isHighIntensity && Math.random() < CONFIG.HIGH_INTENSITY_FLASH_CHANCE) {
+            this.createFlashEffect();
+        }
         
         // Update and draw particles
         for (let i = AppState.entities.length - 1; i >= 0; i--) {
@@ -247,36 +280,47 @@ export const Particles = {
             // Apply behavior patterns
             if (AppState.behaviorPattern === 'chaos') {
                 // Chaotic movement - strong random forces and erratic changes
-                let chaosIntensity = 0.4;
+                const speedMultiplier = AppState.sensoryDimmerMode !== 'off' ? 
+                    window.SensoryDimmer?.getPhaseMultipliers()?.speed || 1 : 1;
+                let chaosIntensity = 0.4 * speedMultiplier;
                 p.vx += (Math.random() - 0.5) * chaosIntensity;
                 p.vy += (Math.random() - 0.5) * chaosIntensity;
                 // Add occasional sudden direction changes
-                if (Math.random() < 0.02) {
-                    p.vx = (Math.random() - 0.5) * 5;
-                    p.vy = (Math.random() - 0.5) * 5;
+                if (Math.random() < 0.02 * speedMultiplier) {
+                    p.vx = (Math.random() - 0.5) * 5 * speedMultiplier;
+                    p.vy = (Math.random() - 0.5) * 5 * speedMultiplier;
                 }
             } else if (timePhase !== null) {
+                const speedMultiplier = AppState.sensoryDimmerMode !== 'off' ? 
+                    window.SensoryDimmer?.getPhaseMultipliers()?.speed || 1 : 1;
+                    
                 if (AppState.behaviorPattern === 'rhythm') {
                     // Rhythmic flowing movement
-                    p.vx += Math.sin(timePhase + i) * 0.1;
-                    p.vy += Math.cos(timePhase * 1.5 + i) * 0.1;
+                    p.vx += Math.sin(timePhase + i) * 0.1 * speedMultiplier;
+                    p.vy += Math.cos(timePhase * 1.5 + i) * 0.1 * speedMultiplier;
                 } else if (AppState.behaviorPattern === 'mix') {
                     // Mix mode - alternate between rhythm and calm
                     let cycleProgress = (Date.now() % CONFIG.MIX_PATTERN_CYCLE_TIME) / CONFIG.MIX_PATTERN_CYCLE_TIME;
                     if (cycleProgress < 0.6) {
                         // Rhythmic period
-                        p.vx += Math.sin(timePhase + i) * 0.1;
-                        p.vy += Math.cos(timePhase * 1.5 + i) * 0.1;
+                        p.vx += Math.sin(timePhase + i) * 0.1 * speedMultiplier;
+                        p.vy += Math.cos(timePhase * 1.5 + i) * 0.1 * speedMultiplier;
                     } else {
                         // Calm period
-                        p.vx += (Math.random() - 0.5) * 0.1;
-                        p.vy += (Math.random() - 0.5) * 0.1;
+                        p.vx += (Math.random() - 0.5) * 0.1 * speedMultiplier;
+                        p.vy += (Math.random() - 0.5) * 0.1 * speedMultiplier;
                     }
                 } else {
                     // Default gentle floating
-                    p.vx += (Math.random() - 0.5) * 0.2;
-                    p.vy += (Math.random() - 0.5) * 0.2;
+                    p.vx += (Math.random() - 0.5) * 0.2 * speedMultiplier;
+                    p.vy += (Math.random() - 0.5) * 0.2 * speedMultiplier;
                 }
+            } else {
+                // Calm behavior pattern
+                const speedMultiplier = AppState.sensoryDimmerMode !== 'off' ? 
+                    window.SensoryDimmer?.getPhaseMultipliers()?.speed || 1 : 1;
+                p.vx += (Math.random() - 0.5) * 0.05 * speedMultiplier;
+                p.vy += (Math.random() - 0.5) * 0.05 * speedMultiplier;
             }
             
             // Update position
@@ -306,6 +350,23 @@ export const Particles = {
             
             // Draw particle
             this.drawParticle(p);
+        }
+    },
+    
+    /**
+     * Create full-screen flash effect for high intensity
+     */
+    createFlashEffect() {
+        const flashAlpha = 0.3;
+        DOM.ctx.fillStyle = `rgba(255, 255, 255, ${flashAlpha})`;
+        DOM.ctx.fillRect(0, 0, DOM.canvas.width, DOM.canvas.height);
+        
+        // Spawn particles from flash
+        for (let i = 0; i < 5; i++) {
+            this.spawn(
+                Math.random() * DOM.canvas.width,
+                Math.random() * DOM.canvas.height
+            );
         }
     }
 };

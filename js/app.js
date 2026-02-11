@@ -7,6 +7,7 @@ import { AppState, AudioState, DOM, initDOM } from './state.js';
 import { AudioEngine, ContinuousSynth, SFX } from './audio.js';
 import { savePreferences, loadPreferences } from './storage.js';
 import { Timer, IdleManager, ViewManager } from './systems.js';
+import { SensoryDimmer } from './sensory-dimmer.js';
 import { Particles } from './views/particles.js';
 import { Sorting } from './views/sorting.js';
 import { Bubbles } from './views/bubbles.js';
@@ -181,6 +182,23 @@ function changeEmergentEvents(events) {
 }
 
 /**
+ * Change sensory dimmer mode setting
+ * @param {string} mode - 'auto' or 'off'
+ */
+function changeSensoryDimmerMode(mode) {
+    const oldMode = AppState.sensoryDimmerMode;
+    AppState.sensoryDimmerMode = mode;
+    document.querySelectorAll('.dimmer-btn').forEach(b => {
+        b.classList.remove('selected');
+        if (b.getAttribute('data-dimmer') === mode) b.classList.add('selected');
+    });
+    saveAllPreferences();
+    
+    // Track parent setting change
+    trackParentSettingChange('sensory_dimmer_mode', oldMode || 'auto', mode);
+}
+
+/**
  * Save all current preferences to storage
  */
 function saveAllPreferences() {
@@ -190,7 +208,8 @@ function saveAllPreferences() {
         behaviorPattern: AppState.behaviorPattern,
         autoSwitchMode: AppState.autoSwitchMode,
         visualDensity: AppState.visualDensity,
-        emergentEvents: AppState.emergentEvents
+        emergentEvents: AppState.emergentEvents,
+        sensoryDimmerMode: AppState.sensoryDimmerMode
     });
 }
 
@@ -437,6 +456,7 @@ function initApp() {
     const autoSwitchMode = savedPrefs?.autoSwitchMode ?? CONFIG.DEFAULT_AUTO_SWITCH_MODE;
     const visualDensity = savedPrefs?.visualDensity ?? CONFIG.DEFAULT_VISUAL_DENSITY;
     const emergentEvents = savedPrefs?.emergentEvents ?? CONFIG.DEFAULT_EMERGENT_EVENTS;
+    const sensoryDimmerMode = savedPrefs?.sensoryDimmerMode ?? CONFIG.DEFAULT_SENSORY_DIMMER_MODE;
     
     changeDuration(duration);
     changeSound(sound);
@@ -444,6 +464,7 @@ function initApp() {
     changeAutoSwitchMode(autoSwitchMode);
     changeVisualDensity(visualDensity);
     changeEmergentEvents(emergentEvents);
+    changeSensoryDimmerMode(sensoryDimmerMode);
 
     // Track initial page view
     trackPageView();
@@ -477,6 +498,7 @@ function initApp() {
         trackSessionStart(sessionIdentifier);
         
             AudioEngine.init();
+            SensoryDimmer.init();
             animate();
             Timer.start(true);
         } catch (error) {
@@ -497,6 +519,8 @@ window.changeBehaviorPattern = changeBehaviorPattern;
 window.changeAutoSwitchMode = changeAutoSwitchMode;
 window.changeVisualDensity = changeVisualDensity;
 window.changeEmergentEvents = changeEmergentEvents;
+window.changeSensoryDimmerMode = changeSensoryDimmerMode;
+window.SensoryDimmer = SensoryDimmer;
 window.togglePause = togglePause;
 window.closeSettings = closeSettings;
 window.showQuitConfirm = showQuitConfirm;

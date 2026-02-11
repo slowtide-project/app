@@ -21,6 +21,10 @@ export const AppState = {
     autoSwitchMode: 'on',
     visualDensity: 'standard',
     emergentEvents: 'off',
+    // Sensory dimmer settings
+    sensoryDimmerMode: 'auto',
+    currentEngagementPhase: 'high',
+    phaseStartTime: 0,
     // Session tracking
     sessionIdentifier: null
 };

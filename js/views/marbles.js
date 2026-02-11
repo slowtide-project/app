@@ -17,15 +17,24 @@ export const Marbles = {
      * Initialize marbles
      */
     init() {
-        let marbleCount = Math.floor(CONFIG.MARBLE_COUNT * getDensityMultiplier());
+        const isHighIntensity = AppState.sensoryDimmerMode !== 'off' && 
+            AppState.currentEngagementPhase === 'high';
+        
+        const baseMarbleCount = isHighIntensity ? CONFIG.HIGH_INTENSITY_MARBLE_COUNT : CONFIG.MARBLE_COUNT;
+        let marbleCount = Math.floor(baseMarbleCount * getDensityMultiplier());
         for (let i = 0; i < marbleCount; i++) {
+            const hasRainbow = isHighIntensity && Math.random() < CONFIG.HIGH_INTENSITY_MARBLE_RAINBOW_CHANCE;
+            const saturation = hasRainbow ? '80%' : '60%';
+            const lightness = hasRainbow ? '70%' : '60%';
+            
             AppState.entities.push({
                 x: Math.random() * DOM.canvas.width, 
                 y: Math.random() * DOM.canvas.height, 
                 vx: (Math.random() - .5) * 2, 
                 vy: (Math.random() - .5) * 2, 
                 r: Math.random() * 15 + 15, 
-                c: `hsl(${Math.random() * 360},60%,60%)`
+                c: `hsl(${Math.random() * 360},${saturation},${lightness})`,
+                rainbow: hasRainbow
             });
         }
     },
@@ -34,12 +43,16 @@ export const Marbles = {
      * Handle marble interaction
      */
     handleInput(x, y) {
+        const isHighIntensity = AppState.sensoryDimmerMode !== 'off' && 
+            AppState.currentEngagementPhase === 'high';
+        const forceMultiplier = isHighIntensity ? CONFIG.HIGH_INTENSITY_MARBLE_FORCE_MULTIPLIER : 1;
+        
         AppState.entities.forEach(m => {
             let dx = m.x - x, dy = m.y - y, d = Math.sqrt(dx * dx + dy * dy);
             if (d < CONFIG.MARBLE_INTERACTION_RADIUS) { 
                 let f = (CONFIG.MARBLE_INTERACTION_RADIUS - d) / CONFIG.MARBLE_INTERACTION_RADIUS, a = Math.atan2(dy, dx); 
-                m.vx += Math.cos(a) * f * CONFIG.MARBLE_INTERACTION_FORCE; 
-                m.vy += Math.sin(a) * f * CONFIG.MARBLE_INTERACTION_FORCE; 
+                m.vx += Math.cos(a) * f * CONFIG.MARBLE_INTERACTION_FORCE * forceMultiplier; 
+                m.vy += Math.sin(a) * f * CONFIG.MARBLE_INTERACTION_FORCE * forceMultiplier; 
             }
         });
     },
@@ -78,9 +91,16 @@ export const Marbles = {
         // Check for emergent events
         this.checkClustering();
         
+        const isHighIntensity = AppState.sensoryDimmerMode !== 'off' && 
+            AppState.currentEngagementPhase === 'high';
+        const speedMultiplier = isHighIntensity ? CONFIG.HIGH_INTENSITY_MARBLE_SPEED_MULTIPLIER : 1;
+        
         for (let i = 0; i < AppState.entities.length; i++) {
             let m = AppState.entities[i]; 
-            m.x += m.vx; m.y += m.vy; m.vx *= CONFIG.MARBLE_DAMPING; m.vy *= CONFIG.MARBLE_DAMPING;
+            m.x += m.vx * speedMultiplier; 
+            m.y += m.vy * speedMultiplier; 
+            m.vx *= CONFIG.MARBLE_DAMPING; 
+            m.vy *= CONFIG.MARBLE_DAMPING;
 
             if (m.x < m.r || m.x > DOM.canvas.width - m.r) { 
                 m.vx *= -CONFIG.MARBLE_BOUNCE_DAMPING; SFX.play('clack'); 
@@ -106,8 +126,19 @@ export const Marbles = {
             }
             DOM.ctx.beginPath(); 
             DOM.ctx.arc(m.x, m.y, m.r, 0, Math.PI * 2); 
-            DOM.ctx.fillStyle = m.c; 
+            
+            // Use animated rainbow colors for high intensity marbles
+            if (m.rainbow) {
+                const rainbowHue = (Date.now() / 10 + m.x + m.y) % 360;
+                DOM.ctx.fillStyle = `hsl(${rainbowHue},80%,70%)`;
+                DOM.ctx.shadowBlur = 20;
+                DOM.ctx.shadowColor = DOM.ctx.fillStyle;
+            } else {
+                DOM.ctx.fillStyle = m.c; 
+            }
+            
             DOM.ctx.fill(); 
+            DOM.ctx.shadowBlur = 0;
             DOM.ctx.strokeStyle = "rgba(255,255,255,0.2)"; 
             DOM.ctx.lineWidth = 2; 
             DOM.ctx.stroke();
