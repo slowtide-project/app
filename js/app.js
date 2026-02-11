@@ -449,6 +449,8 @@ function initApp() {
         // Generate session identifier and track session start
         const sessionIdentifier = generateSessionIdentifier();
         AppState.sessionIdentifier = sessionIdentifier; // Store for reference
+        DOM.sessionIdEl.textContent = sessionIdentifier;
+        DOM.sessionIdEl.style.display = 'block';
         trackSessionStart(sessionIdentifier);
         
         AudioEngine.init();

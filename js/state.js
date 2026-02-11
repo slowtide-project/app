@@ -46,6 +46,7 @@ export const DOM = {
     adminOverlay: null,
     startScreen: null,
     timerDisplay: null,
+    sessionIdEl: null,
     pauseBtn: null,
     navBar: null,
     canvas: null,
@@ -65,6 +66,7 @@ export function initDOM() {
     DOM.adminOverlay = document.getElementById('admin-overlay');
     DOM.startScreen = document.getElementById('start-screen');
     DOM.timerDisplay = document.getElementById('timer-display');
+    DOM.sessionIdEl = document.getElementById('session-id');
     DOM.pauseBtn = document.getElementById('pause-btn');
     DOM.navBar = document.getElementById('nav-bar');
     DOM.canvas = document.getElementById('main-canvas');
