@@ -4,15 +4,14 @@
 
 import { AppState, DOM, AudioState } from './state.js';
 import { trackSessionEnd } from './analytics.js';
-
-let currentMode = null;
+import { ModeManager } from './modes/manager.js';
 
 export function setCurrentMode(mode) {
-    currentMode = mode;
+    ModeManager.setMode(mode);
 }
 
 export function getCurrentMode() {
-    return currentMode;
+    return ModeManager.getMode();
 }
 
 /** Session timer management - mode aware */
@@ -28,13 +27,10 @@ export const Timer = {
             AppState.elapsedSaved = 0; 
         }
         
-        // Only run timer for activities mode
-        if (currentMode === 'activities') {
-            this.updateDisplay();
-            AppState.timerInterval = setInterval(() => { 
-                this.updateDisplay(); 
-            }, 1000);
-        }
+        this.updateDisplay();
+        AppState.timerInterval = setInterval(() => { 
+            this.updateDisplay(); 
+        }, 1000);
     },
 
     /**
@@ -81,7 +77,6 @@ export const Timer = {
      */
     updateDisplay() {
         if (!AppState.isSessionRunning) return;
-        if (currentMode === 'story') return; // No timer for story mode
         
         const totalSeconds = AppState.sessionMinutes * 60;
         const currentSessionElapsed = AppState.isPaused ? 
@@ -103,6 +98,3 @@ export const Timer = {
             (AppState.isPaused ? " (PAUSED)" : "");
     }
 };
-
-// Export for activities mode
-export { currentMode };

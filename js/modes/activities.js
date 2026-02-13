@@ -3,7 +3,7 @@
 // =========================================================================
 
 import { AppState, DOM } from '../state.js';
-import { CONFIG, VIEWS } from '../config.js';
+import { CONFIG, VIEWS, STORY_SCENES } from '../config.js';
 import { AudioEngine, ContinuousSynth } from '../audio.js';
 import { Timer } from '../systems.js';
 import { trackSessionStart, trackActivitySwitch, trackEngagement, trackVirtualPageView, generateSessionIdentifier } from '../analytics.js';
@@ -155,7 +155,7 @@ export const ActivitiesMode = {
      */
     switchView(viewName) {
         // Guard: prevent story scenes in activities mode
-        const storyScenes = [VIEWS.FOREST, VIEWS.BEACH, VIEWS.MEADOW, VIEWS.NIGHT, VIEWS.LAKE];
+        const storyScenes = [STORY_SCENES.FOREST, STORY_SCENES.BEACH, STORY_SCENES.MEADOW, STORY_SCENES.NIGHT, STORY_SCENES.LAKE];
         if (storyScenes.includes(viewName)) {
             console.warn('Cannot switch to story scenes in activities mode:', viewName);
             return;

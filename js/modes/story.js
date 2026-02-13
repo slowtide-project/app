@@ -3,7 +3,7 @@
 // =========================================================================
 
 import { AppState, DOM } from '../state.js';
-import { CONFIG, VIEWS } from '../config.js';
+import { CONFIG, VIEWS, STORY_SCENES } from '../config.js';
 import { trackSessionStart, trackVirtualPageView, generateSessionIdentifier } from '../analytics.js';
 import { Forest } from '../views/story/forest.js';
 import { Beach } from '../views/story/beach.js';
@@ -16,40 +16,31 @@ export const StoryState = {
     isActive: false
 };
 
-// Story scenes
-export const STORY_SCENES = {
-    FOREST: VIEWS.FOREST,
-    BEACH: VIEWS.BEACH,
-    MEADOW: VIEWS.MEADOW,
-    NIGHT: VIEWS.NIGHT,
-    LAKE: VIEWS.LAKE
-};
+// Story scenes - use from config
+const ALL_SCENES = [
+    STORY_SCENES.FOREST,
+    STORY_SCENES.BEACH,
+    STORY_SCENES.MEADOW,
+    STORY_SCENES.NIGHT,
+    STORY_SCENES.LAKE
+];
 
 // Scene view init handlers
 const SceneInitHandlers = {
-    [VIEWS.FOREST]: () => Forest.init(),
-    [VIEWS.BEACH]: () => Beach.init(),
-    [VIEWS.MEADOW]: () => Meadow.init(),
-    [VIEWS.NIGHT]: () => Night.init(),
-    [VIEWS.LAKE]: () => Lake.init()
+    [STORY_SCENES.FOREST]: () => Forest.init(),
+    [STORY_SCENES.BEACH]: () => Beach.init(),
+    [STORY_SCENES.MEADOW]: () => Meadow.init(),
+    [STORY_SCENES.NIGHT]: () => Night.init(),
+    [STORY_SCENES.LAKE]: () => Lake.init()
 };
-
-// All story scenes in order
-const ALL_SCENES = [
-    VIEWS.FOREST,
-    VIEWS.BEACH,
-    VIEWS.MEADOW,
-    VIEWS.NIGHT,
-    VIEWS.LAKE
-];
 
 // Scene titles for tracking
 const SCENE_TITLES = {
-    [VIEWS.FOREST]: 'Forest Scene',
-    [VIEWS.BEACH]: 'Beach Scene',
-    [VIEWS.MEADOW]: 'Meadow Scene',
-    [VIEWS.NIGHT]: 'Night Scene',
-    [VIEWS.LAKE]: 'Lake Scene'
+    [STORY_SCENES.FOREST]: 'Forest Scene',
+    [STORY_SCENES.BEACH]: 'Beach Scene',
+    [STORY_SCENES.MEADOW]: 'Meadow Scene',
+    [STORY_SCENES.NIGHT]: 'Night Scene',
+    [STORY_SCENES.LAKE]: 'Lake Scene'
 };
 
 // Story Mode Controller
@@ -132,7 +123,7 @@ export const StoryMode = {
         this.resizeCanvas();
         
         // Start with forest scene
-        this.switchScene(VIEWS.FOREST);
+        this.switchScene(STORY_SCENES.FOREST);
         
         AppState.isSessionRunning = true;
         AppState.duration = AppState.sessionMinutes;
@@ -183,11 +174,11 @@ export const StoryMode = {
      * Redraw current scene (after resize)
      */
     redrawCurrentScene() {
-        if (AppState.currentView === VIEWS.FOREST) Forest.redraw();
-        else if (AppState.currentView === VIEWS.BEACH) Beach.redraw();
-        else if (AppState.currentView === VIEWS.MEADOW) Meadow.redraw();
-        else if (AppState.currentView === VIEWS.NIGHT) Night.redraw();
-        else if (AppState.currentView === VIEWS.LAKE) Lake.redraw();
+        if (AppState.currentView === STORY_SCENES.FOREST) Forest.redraw();
+        else if (AppState.currentView === STORY_SCENES.BEACH) Beach.redraw();
+        else if (AppState.currentView === STORY_SCENES.MEADOW) Meadow.redraw();
+        else if (AppState.currentView === STORY_SCENES.NIGHT) Night.redraw();
+        else if (AppState.currentView === STORY_SCENES.LAKE) Lake.redraw();
     },
 
     /**

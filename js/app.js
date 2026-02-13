@@ -6,13 +6,11 @@ import { CONFIG, SOUND_TYPES, VIEWS } from './config.js';
 import { AppState, AudioState, DOM, initDOM } from './state.js';
 import { AudioEngine, ContinuousSynth } from './audio.js';
 import { savePreferences, loadPreferences } from './storage.js';
-import { Timer, setCurrentMode, getCurrentMode } from './systems.js';
+import { ModeManager } from './modes/manager.js';
+import { Timer } from './systems.js';
 import { initAdminMode, toggleAdminOverlay, adminSwitchScene } from './admin.js';
 import { generateMathsQuestion } from './utils.js';
 import { trackPageView, trackVirtualPageView, trackError, trackDurationChange, trackAtmosphereChange, trackSFXChange } from './analytics.js';
-
-import { ActivitiesMode } from './modes/activities.js';
-import { StoryMode } from './modes/story.js';
 
 // =========================================================================
 // PARENT MENU & SETTINGS
@@ -182,9 +180,7 @@ function performUpdate() {
 
 function handleInput(e, type) {
     if (AppState.isSessionRunning && !AppState.isPaused) {
-        if (ActivitiesMode) {
-            ActivitiesMode.handleInput(e, type);
-        }
+        ModeManager.handleInput(e, type);
     }
 }
 
@@ -192,24 +188,9 @@ function handleInput(e, type) {
 // MAIN ANIMATION LOOP - delegates to current mode
 // =========================================================================
 
-let lastIdleCheck = 0;
-let currentMode = null;
-
 function animate(timestamp) {
     if (AppState.isSessionRunning && !AppState.isPaused) {
-        // Only run activities when in activities mode
-        if (currentMode === 'activities' && ActivitiesMode) {
-            ActivitiesMode.update();
-            // Check idle once per second
-            if (timestamp - lastIdleCheck > 1000) {
-                ActivitiesMode.checkIdle();
-                lastIdleCheck = timestamp;
-            }
-        }
-        // Only run story when in story mode
-        if (currentMode === 'story' && StoryMode) {
-            StoryMode.update();
-        }
+        ModeManager.update();
     }
     requestAnimationFrame(animate);
 }
@@ -232,8 +213,7 @@ function selectApp(appType) {
 
 function backToAppSelection() {
     // Clean up any running session before going back
-    if (ActivitiesMode) ActivitiesMode.end();
-    if (StoryMode) StoryMode.end();
+    ModeManager.end();
     ContinuousSynth.stop();
     
     // Clear canvas
@@ -246,9 +226,6 @@ function backToAppSelection() {
     DOM.navBar.style.opacity = 0;
     DOM.timerDisplay.style.display = 'none';
     
-    // Reset mode
-    currentMode = null;
-    setCurrentMode(null);
     AppState.currentView = null;
     
     // Show selection screen
@@ -315,12 +292,7 @@ function setupInputListeners() {
 }
 
 function handleResize() {
-    const mode = getCurrentMode();
-    if (mode === 'activities' && ActivitiesMode) {
-        ActivitiesMode.handleResize();
-    } else if (mode === 'story' && StoryMode) {
-        StoryMode.handleResize();
-    }
+    ModeManager.handleResize();
 }
 
 function setupEventListeners() {
@@ -329,18 +301,15 @@ function setupEventListeners() {
         console.log('beginActivitiesBtn clicked!');
         try {
             // Clean up any existing mode before starting
-            if (StoryMode) StoryMode.end();
+            ModeManager.end();
             ContinuousSynth.stop();
             
             console.log('Calling AudioEngine.init()...');
             AudioEngine.init();
-            console.log('Calling setCurrentMode("activities")...');
-            setCurrentMode('activities');
-            currentMode = 'activities';
+            console.log('Calling ModeManager.start("activities")...');
+            ModeManager.start('activities');
             console.log('Calling animate()...');
             animate();
-            console.log('Calling ActivitiesMode.start()...');
-            ActivitiesMode.start();
             console.log('Activities mode started successfully!');
         } catch (error) {
             console.error('Begin activities error:', error);
@@ -353,17 +322,13 @@ function setupEventListeners() {
         console.log('beginStoryBtn clicked!');
         try {
             // Clean up any existing mode before starting
-            if (ActivitiesMode) ActivitiesMode.end();
+            ModeManager.end();
             ContinuousSynth.stop();
             
-            // No audio for story mode (will be added later)
-            console.log('Calling setCurrentMode("story")...');
-            setCurrentMode('story');
-            currentMode = 'story';
+            console.log('Calling ModeManager.start("story")...');
+            ModeManager.start('story');
             console.log('Calling animate()...');
             animate();
-            console.log('Calling StoryMode.start()...');
-            StoryMode.start();
             console.log('Story mode started successfully!');
         } catch (error) {
             console.error('Begin story error:', error);
@@ -377,8 +342,7 @@ function setupEventListeners() {
 // =========================================================================
 
 function resetApp() {
-    if (ActivitiesMode) ActivitiesMode.end();
-    if (StoryMode) StoryMode.end();
+    ModeManager.end();
     ContinuousSynth.stop();
     
     if (AudioState.noiseSource) {
@@ -410,9 +374,6 @@ function resetApp() {
         AppState.timerInterval = null;
     }
     
-    currentMode = null;
-    setCurrentMode(null);
-    
     DOM.startScreenActivities.style.display = 'none';
     DOM.startScreenStory.style.display = 'none';
     DOM.appSelectionScreen.style.display = 'flex';
@@ -420,7 +381,7 @@ function resetApp() {
     trackVirtualPageView('/app-selection');
 }
 
-window.switchView = ActivitiesMode ? ActivitiesMode.switchView : () => {};
+window.switchView = (viewName) => ModeManager.switchView(viewName);
 window.changeDuration = changeDuration;
 window.changeSound = changeSound;
 window.setSFX = setSFX;

@@ -85,7 +85,10 @@ export const VIEWS = {
     SORTING: 'sorting',
     BUBBLES: 'bubbles',
     LIQUID: 'liquid',
-    MARBLES: 'marbles',
+    MARBLES: 'marbles'
+};
+
+export const STORY_SCENES = {
     FOREST: 'forest',
     BEACH: 'beach',
     MEADOW: 'meadow',

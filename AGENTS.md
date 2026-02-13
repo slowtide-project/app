@@ -12,16 +12,15 @@ This document outlines common development tasks and the recommended approach for
 
 **Agent**: General Purpose
 **Files to modify**:
-- Create `js/views/[new-view].js` (follow existing pattern)
+- Create `js/views/activities/[new-view].js` (follow existing pattern)
 - Update `js/config.js` - add new view to `VIEWS` enum
-- Update `js/systems.js` - import new view from `./views/[new-view].js`
-- Update `js/app.js` - import new view from `./views/[new-view].js`
+- Update `js/modes/activities.js` - add handler mappings
 - Update `index.html` - add navigation button
 
 **Pattern to follow**:
 ```javascript
-import { AppState, DOM } from '../state.js';
-import { CONFIG } from '../config.js';
+import { AppState, DOM } from '../../state.js';
+import { CONFIG, VIEWS } from '../../config.js';
 
 export const NewView = {
     init() {
@@ -41,6 +40,60 @@ export const NewView = {
     }
 };
 ```
+
+---
+
+## 🎭 Adding New Story Scenes
+
+**When to use**: Adding a new static calming scene
+
+**Agent**: General Purpose
+**Files to modify**:
+- Create `js/views/story/[new-scene].js` (follow existing pattern)
+- Update `js/config.js` - add new scene to `STORY_SCENES` enum
+- Update `js/modes/story.js` - add handler mappings
+- Update `js/admin.js` - add scene to switch logic (if needed)
+
+**Pattern to follow**:
+```javascript
+import { AppState, DOM } from '../../state.js';
+import { CONFIG, STORY_SCENES } from '../../config.js';
+
+export const NewScene = {
+    init() {
+        // Draw the static scene
+    },
+    
+    redraw() {
+        // Redraw after resize
+    }
+};
+```
+
+---
+
+## ⚙️ Mode Manager Architecture
+
+**When to use**: Understanding or modifying how modes are routed
+
+**Agent**: General Purpose
+
+The `js/modes/manager.js` is the central hub for mode routing:
+
+| Method | Purpose |
+|--------|---------|
+| `getMode()` | Returns current mode: `'activities'`, `'story'`, or `null` |
+| `setMode(mode)` | Internal use - prefer `start()`/`end()` |
+| `handleInput(e, type)` | Routes input events to correct mode |
+| `update()` | Calls ActivitiesMode.update() (story is static) |
+| `switchView(name)` | Routes view switching to correct mode |
+| `start(mode)` | Starts a mode session, sets mode, calls appropriate start |
+| `end()` | Ends current mode, cleans up, clears mode |
+| `handleResize()` | Routes resize to correct mode |
+
+**Defense-in-depth**: Both `activities.js` and `story.js` have guards that block cross-mode switching attempts. The guards in ModeManager should always be the first line of defense, but these secondary guards catch direct calls to mode methods.
+
+**Timer**: Activities mode calls `Timer.start()` directly. Story mode does not use the timer.
 
 ---
 
@@ -363,40 +416,51 @@ update() {
 
 **Current directory structure**:
 ```
-├── js/             # JavaScript modules
-│   ├── app.js          # Main application entry point
-│   ├── config.js       # Configuration constants and enums
+├── js/                  # JavaScript modules
+│   ├── app.js          # Main application entry point (delegates to ModeManager)
+│   ├── config.js       # Configuration constants and enums (VIEWS, STORY_SCENES)
 │   ├── state.js        # Global state management
 │   ├── storage.js      # LocalStorage utilities
 │   ├── audio.js        # Audio engine and sound effects
-│   ├── systems.js      # Timer, idle manager, view manager
+│   ├── systems.js      # Timer (mode-agnostic), setCurrentMode/getCurrentMode wrappers
 │   ├── sensory-dimmer.js # Sensory dimmer system
 │   ├── admin.js        # Admin/debug overlay
 │   ├── utils.js        # Shared utility functions
-│   └── views/          # Activity view modules
-│       ├── particles.js
-│       ├── bubbles.js
-│       ├── sorting.js
-│       ├── liquid.js
-│       ├── marbles.js
-│       └── [new views go here]
-├── css/            # Stylesheets
-│   └── styles.css       # All application styling
-├── assets/         # Static assets
-│   └── icon.png         # PWA icon
-├── index.html      # Main HTML file
-├── manifest.json   # PWA manifest
-└── sw.js          # Service worker for offline support
+│   ├── modes/         # Mode controllers
+│   │   ├── manager.js  # Centralized mode routing (input, update, switchView, start/end)
+│   │   ├── activities.js # Activities mode controller
+│   │   └── story.js   # Story mode controller
+│   └── views/         # View modules (split by mode)
+│       ├── activities/ # Activity views (particles, bubbles, sorting, liquid, marbles)
+│       │   ├── particles.js
+│       │   ├── bubbles.js
+│       │   ├── sorting.js
+│       │   ├── liquid.js
+│       │   └── marbles.js
+│       └── story/      # Story scenes (forest, beach, meadow, night, lake)
+│           ├── forest.js
+│           ├── beach.js
+│           ├── meadow.js
+│           ├── night.js
+│           └── lake.js
+├── css/                # Stylesheets
+│   └── styles.css     # All application styling
+├── assets/             # Static assets
+│   └── icon.png       # PWA icon
+├── index.html         # Main HTML file
+├── manifest.json      # PWA manifest
+├── sw.js             # Service worker for offline support
+└── AGENTS.md          # This file
 ```
 
 **Benefits of current structure**:
-- Easier code navigation
-- Better team collaboration
-- Cleaner git history
-- Reduced merge conflicts
-- Modern JavaScript practices
-- Scalable organization for adding new activities
-- **PWA-ready** with offline support
+- Clear separation between Activities and Story modes
+- Centralized mode routing via ModeManager
+- Mode-specific code isolated in `js/modes/`
+- Views organized by mode (`js/views/activities/`, `js/views/story/`)
+- Defense-in-depth guards prevent cross-mode switching
+- Easier code navigation and team collaboration
+- Clean git history and reduced merge conflicts
 
 ---
 

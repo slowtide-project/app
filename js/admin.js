@@ -3,7 +3,7 @@
 // =========================================================================
 
 import { AppState, AudioState, DOM } from './state.js';
-import { VIEWS } from './config.js';
+import { VIEWS, STORY_SCENES } from './config.js';
 import { StoryMode } from './modes/story.js';
 import { getCurrentMode } from './systems.js';
 
@@ -76,16 +76,16 @@ export function adminSwitchScene() {
     // Update admin display
     let sceneName;
     let buttonText;
-    if (nextScene === VIEWS.FOREST) {
+    if (nextScene === STORY_SCENES.FOREST) {
         sceneName = 'Forest';
         buttonText = 'Switch to Beach';
-    } else if (nextScene === VIEWS.BEACH) {
+    } else if (nextScene === STORY_SCENES.BEACH) {
         sceneName = 'Beach';
         buttonText = 'Switch to Meadow';
-    } else if (nextScene === VIEWS.MEADOW) {
+    } else if (nextScene === STORY_SCENES.MEADOW) {
         sceneName = 'Meadow';
         buttonText = 'Switch to Night';
-    } else if (nextScene === VIEWS.NIGHT) {
+    } else if (nextScene === STORY_SCENES.NIGHT) {
         sceneName = 'Night';
         buttonText = 'Switch to Lake';
     } else {
