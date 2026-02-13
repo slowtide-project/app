@@ -381,6 +381,15 @@ function resetApp() {
     if (StoryMode) StoryMode.end();
     ContinuousSynth.stop();
     
+    if (AudioState.noiseSource) {
+        try { AudioState.noiseSource.stop(); } catch (e) { }
+        AudioState.noiseSource = null;
+    }
+    if (AudioState.waveLFO) {
+        try { AudioState.waveLFO.stop(); } catch (e) { }
+        AudioState.waveLFO = null;
+    }
+    
     if (DOM.ctx) {
         DOM.ctx.clearRect(0, 0, DOM.canvas.width, DOM.canvas.height);
     }

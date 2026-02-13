@@ -278,10 +278,7 @@ export const ActivitiesMode = {
         // Start timer
         Timer.start();
         
-        // Start audio
-        if (AppState.currentSound !== 'off') {
-            ContinuousSynth.start(AppState.currentSound);
-        }
+        // Note: Atmosphere audio is handled by AudioEngine.init() in app.js
         
         if (typeof trackSessionStart === 'function') {
             trackSessionStart(sessionIdentifier);
