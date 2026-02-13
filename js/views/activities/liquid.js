@@ -1,5 +1,5 @@
-import { AppState, DOM } from '../state.js';
-import { CONFIG } from '../config.js';
+import { AppState, DOM } from '../../state.js';
+import { CONFIG } from '../../config.js';
 
 // 4. LIQUID VIEW - Simple elegant version
 export const Liquid = {

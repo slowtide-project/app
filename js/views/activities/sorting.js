@@ -1,7 +1,7 @@
-import { AppState, DOM } from '../state.js';
-import { CONFIG, VIEWS } from '../config.js';
-import { ContinuousSynth } from '../audio.js';
-import { pulse } from '../utils.js';
+import { AppState, DOM } from '../../state.js';
+import { CONFIG, VIEWS } from '../../config.js';
+import { ContinuousSynth } from '../../audio.js';
+import { pulse } from '../../utils.js';
 
 // Helper function to get density multiplier
 function getDensityMultiplier() {

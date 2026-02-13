@@ -1,7 +1,7 @@
-import { AppState, DOM } from '../state.js';
-import { CONFIG } from '../config.js';
-import { SFX } from '../audio.js';
-import { pulse } from '../utils.js';
+import { AppState, DOM } from '../../state.js';
+import { CONFIG } from '../../config.js';
+import { SFX } from '../../audio.js';
+import { pulse } from '../../utils.js';
 
 // Helper function to get density multiplier
 function getDensityMultiplier() {

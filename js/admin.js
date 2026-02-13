@@ -3,6 +3,9 @@
 // =========================================================================
 
 import { AppState, AudioState, DOM } from './state.js';
+import { VIEWS } from './config.js';
+import { StoryMode } from './modes/story.js';
+import { getCurrentMode } from './systems.js';
 
 /** Admin mode state */
 const AdminMode = {
@@ -50,7 +53,8 @@ export function toggleAdminOverlay() {
  */
 function updateAdminDebugInfo() {
     document.getElementById('admin-session-status').textContent = AppState.isSessionRunning ? 'Yes' : 'No';
-    document.getElementById('admin-current-view').textContent = AppState.currentView;
+    document.getElementById('admin-current-mode').textContent = getCurrentMode() || 'None';
+    document.getElementById('admin-current-view').textContent = AppState.currentView || '-';
     document.getElementById('admin-paused-status').textContent = AppState.isPaused ? 'Yes' : 'No';
     document.getElementById('admin-audio-status').textContent = AudioState.context ? AudioState.context.state : 'Not Initialized';
     document.getElementById('admin-entities-count').textContent = AppState.entities.length;
@@ -62,10 +66,52 @@ function updateAdminDebugInfo() {
 export function adminForceSunset() {
     AdminMode.sunsetForced = !AdminMode.sunsetForced;
     DOM.sunsetOverlay.style.opacity = AdminMode.sunsetForced ? 1 : 0;
-
+    
     const btn = document.querySelector('#admin-overlay .admin-btn[onclick="adminForceSunset()"]');
     if (btn) {
         btn.textContent = AdminMode.sunsetForced ? 'Sunset ON' : 'Sunset OFF';
         btn.classList.toggle('active', AdminMode.sunsetForced);
+    }
+}
+
+/**
+ * Admin action: Switch between story scenes (Forest/Beach/Meadow/Night/Lake)
+ * Only works in story mode
+ */
+export function adminSwitchScene() {
+    // Only works in story mode
+    if (!StoryMode || !StoryMode.isActive) {
+        alert('Scene switching is only available in story mode');
+        return;
+    }
+    
+    const nextScene = StoryMode.getNextScene();
+    StoryMode.switchScene(nextScene);
+    
+    // Update admin display
+    let sceneName;
+    let buttonText;
+    if (nextScene === VIEWS.FOREST) {
+        sceneName = 'Forest';
+        buttonText = 'Switch to Beach';
+    } else if (nextScene === VIEWS.BEACH) {
+        sceneName = 'Beach';
+        buttonText = 'Switch to Meadow';
+    } else if (nextScene === VIEWS.MEADOW) {
+        sceneName = 'Meadow';
+        buttonText = 'Switch to Night';
+    } else if (nextScene === VIEWS.NIGHT) {
+        sceneName = 'Night';
+        buttonText = 'Switch to Lake';
+    } else {
+        sceneName = 'Lake';
+        buttonText = 'Switch to Forest';
+    }
+    
+    document.getElementById('admin-current-scene').textContent = sceneName;
+    
+    const btn = document.querySelector('#admin-overlay .admin-btn[onclick="adminSwitchScene()"]');
+    if (btn) {
+        btn.textContent = buttonText;
     }
 }

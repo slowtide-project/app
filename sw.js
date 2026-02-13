@@ -2,7 +2,7 @@
 // Service Worker for Slowtide PWA
 // =========================================================================
 
-const CACHE_NAME = 'slowtide-v2';
+const CACHE_NAME = 'slowtide-v3';
 const STATIC_ASSETS = [
     './',
     './index.html',
@@ -17,11 +17,19 @@ const STATIC_ASSETS = [
     './js/utils.js',
     './js/admin.js',
     './js/analytics.js',
-    './js/views/particles.js',
-    './js/views/sorting.js',
-    './js/views/bubbles.js',
-    './js/views/liquid.js',
-    './js/views/marbles.js'
+    './js/sensory-dimmer.js',
+    './js/modes/activities.js',
+    './js/modes/story.js',
+    './js/views/activities/particles.js',
+    './js/views/activities/sorting.js',
+    './js/views/activities/bubbles.js',
+    './js/views/activities/liquid.js',
+    './js/views/activities/marbles.js',
+    './js/views/story/forest.js',
+    './js/views/story/beach.js',
+    './js/views/story/meadow.js',
+    './js/views/story/night.js',
+    './js/views/story/lake.js'
 ];
 
 // Install event - cache all static assets

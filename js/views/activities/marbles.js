@@ -1,6 +1,6 @@
-import { AppState, DOM } from '../state.js';
-import { CONFIG } from '../config.js';
-import { SFX } from '../audio.js';
+import { AppState, DOM } from '../../state.js';
+import { CONFIG } from '../../config.js';
+import { SFX } from '../../audio.js';
 
 // Helper function to get density multiplier
 function getDensityMultiplier() {

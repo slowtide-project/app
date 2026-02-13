@@ -27,6 +27,7 @@ export async function trackSessionStart(sessionIdentifier = null) {
     
     gtag('event', 'session_start', {
         session_identifier: sessionIdentifier,
+        app_type: AppState.appType || 'activities',
         duration_selected: AppState.duration.toString(),
         atmosphere: AppState.soundType,
         sfx_enabled: AppState.sfxEnabled.toString(),
@@ -57,6 +58,7 @@ export function trackSessionEnd(completed = false) {
     const deviceInfo = getDeviceInfo();
     
     gtag('event', 'session_end', {
+        app_type: AppState.appType || 'activities',
         duration_selected: AppState.duration.toString(),
         actual_duration: actualDuration.toString(),
         completed: completed.toString(),

@@ -1,42 +1,33 @@
 // =========================================================================
-// Main application logic
+// Main application logic - delegates to mode files
 // =========================================================================
 
 import { CONFIG, SOUND_TYPES, VIEWS } from './config.js';
 import { AppState, AudioState, DOM, initDOM } from './state.js';
-import { AudioEngine, ContinuousSynth, SFX } from './audio.js';
+import { AudioEngine, ContinuousSynth } from './audio.js';
 import { savePreferences, loadPreferences } from './storage.js';
-import { Timer, IdleManager, ViewManager } from './systems.js';
+import { Timer, setCurrentMode } from './systems.js';
 import { SensoryDimmer } from './sensory-dimmer.js';
-import { Particles } from './views/particles.js';
-import { Sorting } from './views/sorting.js';
-import { Bubbles } from './views/bubbles.js';
-import { Liquid } from './views/liquid.js';
-import { Marbles } from './views/marbles.js';
-import { initAdminMode, toggleAdminOverlay, adminForceSunset } from './admin.js';
+import { initAdminMode, toggleAdminOverlay, adminForceSunset, adminSwitchScene } from './admin.js';
 import { generateMathsQuestion } from './utils.js';
-import { trackSessionStart, trackSessionEnd, trackAtmosphereChange, trackDurationChange, trackSFXChange, trackParentSettingChange, trackActivitySwitch, trackAppUpdate, trackPageView, trackVirtualPageView, trackError, trackEngagement, setupEngagementTracking, generateSessionIdentifier } from './analytics.js';
+import { trackPageView, trackVirtualPageView, trackError, trackDurationChange, trackAtmosphereChange, trackSFXChange, trackParentSettingChange } from './analytics.js';
+
+import { ActivitiesMode } from './modes/activities.js';
+import { StoryMode } from './modes/story.js';
 
 // =========================================================================
 // PARENT MENU & SETTINGS
 // =========================================================================
 
-/** Parent menu state */
 const ParentMenu = {
     tapCount: 0,
     tapResetTimer: null
 };
 
-/**
- * Initialize parent menu event listeners
- */
 function initParentMenu() {
     DOM.titleEl.addEventListener('click', handleTitleTap);
 }
 
-/**
- * Handle title tap sequence to unlock parent menu
- */
 function handleTitleTap() {
     clearTimeout(ParentMenu.tapResetTimer);
     ParentMenu.tapCount++;
@@ -52,9 +43,6 @@ function handleTitleTap() {
 // MATHS CHALLENGE SYSTEM
 // =========================================================================
 
-/**
- * Show the maths challenge modal with a new question
- */
 function showMathsChallenge() {
     const questionData = generateMathsQuestion();
     AppState.mathsChallenge.currentQuestion = questionData.question;
@@ -65,25 +53,18 @@ function showMathsChallenge() {
     DOM.mathsChallengeModal.style.display = 'block';
 }
 
-/**
- * Check the user's answer to the maths challenge
- * @param {number} answer - The user's answer
- */
 function checkMathsAnswer(answer) {
     if (!AppState.mathsChallenge.isActive) return;
     
     if (answer === AppState.mathsChallenge.correctAnswer) {
-        // Correct answer - open settings
         closeMathsChallenge();
         DOM.settingsModal.style.display = 'block';
     } else {
-        // Wrong answer - shake modal and generate new question
         DOM.mathsChallengeModal.style.animation = 'shake 0.3s';
         setTimeout(() => {
             DOM.mathsChallengeModal.style.animation = '';
         }, 300);
         
-        // Generate new question
         const questionData = generateMathsQuestion();
         AppState.mathsChallenge.currentQuestion = questionData.question;
         AppState.mathsChallenge.correctAnswer = questionData.answer;
@@ -91,9 +72,6 @@ function checkMathsAnswer(answer) {
     }
 }
 
-/**
- * Close the maths challenge modal
- */
 function closeMathsChallenge() {
     AppState.mathsChallenge.isActive = false;
     AppState.mathsChallenge.currentQuestion = null;
@@ -101,10 +79,10 @@ function closeMathsChallenge() {
     DOM.mathsChallengeModal.style.display = 'none';
 }
 
-/**
- * Update session duration and refresh UI
- * @param {number} mins - Duration in minutes
- */
+// =========================================================================
+// SETTINGS & PREFERENCES
+// =========================================================================
+
 function changeDuration(mins) {
     const oldDuration = AppState.sessionMinutes;
     AppState.sessionMinutes = mins;
@@ -115,21 +93,11 @@ function changeDuration(mins) {
     Timer.updateDisplay();
     saveAllPreferences();
     
-    // Track duration change
     if (AppState.isSessionRunning) {
         trackDurationChange(oldDuration, mins);
-        trackVirtualPageView('Settings Modal', {
-            setting_type: 'duration_change',
-            old_value: oldDuration,
-            new_value: mins
-        });
     }
 }
 
-/**
- * Update soundscape and regenerate audio if needed
- * @param {string} type - Sound type from SOUND_TYPES
- */
 function changeSound(type) {
     const oldSound = AppState.currentSound;
     AppState.currentSound = type;
@@ -143,16 +111,11 @@ function changeSound(type) {
     }
     saveAllPreferences();
     
-    // Track atmosphere change
     if (AppState.isSessionRunning || oldSound !== type) {
         trackAtmosphereChange(oldSound, type);
     }
 }
 
-/**
- * Toggle sound effects on/off
- * @param {string} val - 'on' or 'off'
- */
 function setSFX(val) {
     AppState.sfxEnabled = (val === 'on');
     document.querySelectorAll('.sfx-btn').forEach(b => {
@@ -160,15 +123,9 @@ function setSFX(val) {
         if (b.getAttribute('data-sfx') === val) b.classList.add('selected');
     });
     saveAllPreferences();
-    
-    // Track SFX change
     trackSFXChange(AppState.sfxEnabled);
 }
 
-/**
- * Change behavior pattern
- * @param {string} pattern - 'chaos', 'rhythm', or 'mix'
- */
 function changeBehaviorPattern(pattern) {
     const oldPattern = AppState.behaviorPattern;
     AppState.behaviorPattern = pattern;
@@ -177,15 +134,9 @@ function changeBehaviorPattern(pattern) {
         if (b.getAttribute('data-pattern') === pattern) b.classList.add('selected');
     });
     saveAllPreferences();
-    
-    // Track parent setting change
     trackParentSettingChange('behavior_pattern', oldPattern || 'chaos', pattern);
 }
 
-/**
- * Change auto-switch mode
- * @param {string} mode - 'on', 'off', or 'long'
- */
 function changeAutoSwitchMode(mode) {
     const oldMode = AppState.autoSwitchMode;
     AppState.autoSwitchMode = mode;
@@ -194,15 +145,9 @@ function changeAutoSwitchMode(mode) {
         if (b.getAttribute('data-switch') === mode) b.classList.add('selected');
     });
     saveAllPreferences();
-    
-    // Track parent setting change
     trackParentSettingChange('auto_switch_mode', oldMode || 'on', mode);
 }
 
-/**
- * Change visual density
- * @param {string} density - 'minimal', 'standard', or 'rich'
- */
 function changeVisualDensity(density) {
     const oldDensity = AppState.visualDensity;
     AppState.visualDensity = density;
@@ -210,18 +155,11 @@ function changeVisualDensity(density) {
         b.classList.remove('selected');
         if (b.getAttribute('data-density') === density) b.classList.add('selected');
     });
-    // Reinitialize current view to apply density change
-    ViewManager.switchView(AppState.currentView);
+    ActivitiesMode.switchView(AppState.currentView);
     saveAllPreferences();
-    
-    // Track parent setting change
     trackParentSettingChange('visual_density', oldDensity || 'standard', density);
 }
 
-/**
- * Change emergent events setting
- * @param {string} events - 'off', 'rare', or 'common'
- */
 function changeEmergentEvents(events) {
     const oldEvents = AppState.emergentEvents;
     AppState.emergentEvents = events;
@@ -230,15 +168,9 @@ function changeEmergentEvents(events) {
         if (b.getAttribute('data-emergent') === events) b.classList.add('selected');
     });
     saveAllPreferences();
-    
-    // Track parent setting change
     trackParentSettingChange('emergent_events', oldEvents || 'off', events);
 }
 
-/**
- * Change sensory dimmer mode setting
- * @param {string} mode - 'auto' or 'off'
- */
 function changeSensoryDimmerMode(mode) {
     const oldMode = AppState.sensoryDimmerMode;
     AppState.sensoryDimmerMode = mode;
@@ -247,14 +179,9 @@ function changeSensoryDimmerMode(mode) {
         if (b.getAttribute('data-dimmer') === mode) b.classList.add('selected');
     });
     saveAllPreferences();
-    
-    // Track parent setting change
     trackParentSettingChange('sensory_dimmer_mode', oldMode || 'auto', mode);
 }
 
-/**
- * Save all current preferences to storage
- */
 function saveAllPreferences() {
     savePreferences({
         duration: AppState.sessionMinutes,
@@ -267,9 +194,10 @@ function saveAllPreferences() {
     });
 }
 
-/**
- * Toggle session pause/resume state
- */
+// =========================================================================
+// UI HELPERS
+// =========================================================================
+
 function togglePause() {
     if (!AppState.isSessionRunning) return;
     AppState.isPaused = !AppState.isPaused;
@@ -280,27 +208,24 @@ function togglePause() {
     }
 }
 
-/**
- * UI helper functions
- */
 function closeSettings() { 
     DOM.settingsModal.style.display = 'none';
     trackVirtualPageView('Main Session');
 }
+
 function showQuitConfirm() { 
     DOM.settingsModal.style.display = 'none'; 
     DOM.confirmModal.style.display = 'block';
     trackVirtualPageView('Quit Confirmation');
 }
+
 function closeQuitConfirm() { 
     DOM.confirmModal.style.display = 'none'; 
     DOM.settingsModal.style.display = 'block';
     trackVirtualPageView('Settings Modal');
 }
-function performUpdate() { 
-    trackAppUpdate();
-    
-    // Force complete cache bypass
+
+function performUpdate() {
     if ('caches' in window) {
         caches.keys().then(function(names) {
             names.forEach(function(name) {
@@ -309,34 +234,23 @@ function performUpdate() {
         });
     }
     
-    // Hard refresh with cache busting
     const timestamp = new Date().getTime();
     window.location.href = window.location.origin + window.location.pathname + '?v=' + timestamp;
 }
 
-/**
- * Show advanced options modal from start screen
- */
 function showAdvancedOptions() {
     DOM.advancedOptionsModal.style.display = 'block';
     trackVirtualPageView('Advanced Options');
 }
 
-/**
- * Show advanced options modal from settings (during session)
- */
 function showAdvancedOptionsFromSettings() {
     DOM.settingsModal.style.display = 'none';
     DOM.advancedOptionsModal.style.display = 'block';
     trackVirtualPageView('Advanced Options');
 }
 
-/**
- * Close advanced options modal
- */
 function closeAdvancedOptions() {
     DOM.advancedOptionsModal.style.display = 'none';
-    // If we're in a session, show settings modal again
     if (AppState.isSessionRunning) {
         DOM.settingsModal.style.display = 'block';
         trackVirtualPageView('Settings Modal');
@@ -345,155 +259,155 @@ function closeAdvancedOptions() {
     }
 }
 
-/** Reset application to start state */
 function resetApp() {
-    // Track session end before resetting
-    if (AppState.isSessionRunning) {
-        trackSessionEnd(false); // Session ended early
-    }
-    
     DOM.confirmModal.style.display = 'none';
+    
+    // Stop all audio
+    ContinuousSynth.stop();
     if (AudioState.context) AudioState.context.suspend();
     if (AudioState.noiseSource) try { AudioState.noiseSource.stop(); } catch (e) { }
+    
+    // Clear timer
     clearInterval(AppState.timerInterval);
+    
+    // End both modes (cleanup)
+    if (ActivitiesMode) ActivitiesMode.end();
+    if (StoryMode) StoryMode.end();
+    
+    // Reset all state
     AppState.isSessionRunning = false; 
     AppState.isPaused = false; 
     AppState.elapsedSaved = 0;
+    AppState.entities = [];
+    AppState.currentView = null;
+    
+    // Reset UI elements
     DOM.sunsetOverlay.style.opacity = 0;
     DOM.navBar.style.display = 'none'; 
     DOM.navBar.style.opacity = 0;
-    DOM.startScreen.style.display = 'flex';
+    DOM.timerDisplay.style.display = 'none';
+    
+    // Clear canvas
+    if (DOM.ctx) {
+        DOM.ctx.clearRect(0, 0, DOM.canvas.width, DOM.canvas.height);
+    }
+    
+    // Hide all screens
+    DOM.startScreenActivities.style.display = 'none';
+    DOM.startScreenStory.style.display = 'none';
+    DOM.appSelectionScreen.style.display = 'flex';
+    
+    // Reset mode
+    currentMode = null;
+    setCurrentMode(null);
+    
     DOM.pauseBtn.innerText = "Pause Session";
     DOM.pauseBtn.className = "action-btn pause-btn";
 }
 
 // =========================================================================
-// INPUT HANDLING SYSTEM
+// INPUT HANDLING - delegates to current mode
 // =========================================================================
 
-/** View handler mapping for input dispatch */
-const ViewInputHandlers = {
-    [VIEWS.PARTICLES]: {
-        start: (x, y, yRatio) => { Particles.spawn(x, y); ContinuousSynth.start(VIEWS.PARTICLES, yRatio); },
-        move: (x, y) => Particles.spawn(x, y)
-    },
-    [VIEWS.SORTING]: {
-        start: (x, y) => Sorting.handleStart(x, y),
-        move: (x, y) => Sorting.handleMove(x, y),
-        end: () => Sorting.handleEnd()
-    },
-    [VIEWS.BUBBLES]: {
-        start: (x, y) => Bubbles.handleStart(x, y)
-    },
-    [VIEWS.LIQUID]: {
-        start: (x, y, yRatio) => { Liquid.handleStart(x, y); ContinuousSynth.start(VIEWS.LIQUID, yRatio); },
-        move: (x, y) => Liquid.handleStart(x, y)
-    },
-    [VIEWS.MARBLES]: {
-        start: (x, y) => Marbles.handleInput(x, y),
-        move: (x, y) => Marbles.handleInput(x, y)
-    }
-};
-
-/** System for managing user input */
-const InputManager = {
-    /**
-     * Initialize input event listeners
-     */
-    init() {
-        DOM.canvas.addEventListener('mouseup', e => this.handleInput(e, 'end'));
-        DOM.canvas.addEventListener('touchend', e => this.handleInput(e, 'end'));
-        DOM.canvas.addEventListener('mouseleave', e => this.handleInput(e, 'end'));
-        
-        DOM.canvas.addEventListener('mousedown', e => this.handleInput(e, 'start'));
-        DOM.canvas.addEventListener('touchstart', e => this.handleInput(e, 'start'), { passive: false });
-        DOM.canvas.addEventListener('mousemove', e => this.handleInput(e, 'move'));
-        DOM.canvas.addEventListener('touchmove', e => this.handleInput(e, 'move'), { passive: false });
-        
-        window.addEventListener('resize', this.resize);
-    },
-
-    /**
-     * Handle input for the app
-     */
-    handleInput(e, type) {
-        if (type === 'end') {
-            ContinuousSynth.stop();
-            const handler = ViewInputHandlers[AppState.currentView];
-            if (handler?.end) handler.end();
-            return;
+function handleInput(e, type) {
+    if (AppState.isSessionRunning && !AppState.isPaused) {
+        if (ActivitiesMode) {
+            ActivitiesMode.handleInput(e, type);
         }
+    }
+}
 
-        if (e.target.closest('.nav-btn') || e.target.closest('#header-area') || e.target.closest('.modal-overlay')) return;
-        e.preventDefault();
-        const t = e.touches ? e.touches[0] : e;
-        const x = t.clientX; const y = t.clientY;
+// =========================================================================
+// MAIN ANIMATION LOOP - delegates to current mode
+// =========================================================================
 
-        AppState.lastInteraction = Date.now();
-        
-        // Track user interaction as engagement
-        if (AppState.isSessionRunning) {
-            trackEngagement('user_interaction');
-            if (typeof trackInteraction === 'function') {
-                trackInteraction();
+let lastIdleCheck = 0;
+let currentMode = null;
+
+function animate(timestamp) {
+    if (AppState.isSessionRunning && !AppState.isPaused) {
+        // Only run activities when in activities mode
+        if (currentMode === 'activities' && ActivitiesMode) {
+            ActivitiesMode.update();
+            // Check idle once per second
+            if (timestamp - lastIdleCheck > 1000) {
+                ActivitiesMode.checkIdle();
+                lastIdleCheck = timestamp;
             }
         }
-        
-        const yRatio = y / DOM.canvas.height;
-
-        const handler = ViewInputHandlers[AppState.currentView];
-        if (handler?.[type]) handler[type](x, y, yRatio);
-    },
-
-    /**
-     * Resize canvas to window dimensions
-     */
-    resize() { 
-        DOM.canvas.width = window.innerWidth; 
-        DOM.canvas.height = window.innerHeight; 
-    }
-};
-
-// =========================================================================
-// MAIN ANIMATION LOOP
-// =========================================================================
-
-/** View update mapping for animation dispatch */
-const ViewUpdateHandlers = {
-    [VIEWS.PARTICLES]: () => Particles.update(),
-    [VIEWS.SORTING]: () => Sorting.update(),
-    [VIEWS.BUBBLES]: () => Bubbles.update(),
-    [VIEWS.LIQUID]: () => Liquid.update(),
-    [VIEWS.MARBLES]: () => Marbles.update()
-};
-
-/**
- * Main render loop - updates current view
- */
-function animate() {
-    if (AppState.isSessionRunning && !AppState.isPaused) {
-        const updateHandler = ViewUpdateHandlers[AppState.currentView];
-        if (updateHandler) updateHandler();
+        // Only run story when in story mode
+        if (currentMode === 'story' && StoryMode) {
+            StoryMode.update();
+        }
     }
     requestAnimationFrame(animate);
 }
 
 // =========================================================================
-// Application initialization
+// APP SELECTION
 // =========================================================================
 
-/**
- * Initialize application
- */
-function initApp() {
-    try {
-        // Initialize DOM references
-        initDOM();
+function selectApp(appType) {
+    DOM.appSelectionScreen.style.display = 'none';
+    
+    if (appType === 'activities') {
+        DOM.startScreenActivities.style.display = 'flex';
+        trackVirtualPageView('/activities-setup');
+    } else if (appType === 'story') {
+        DOM.startScreenStory.style.display = 'flex';
+        trackVirtualPageView('/story-setup');
+    }
+}
 
-        // Initialize event listeners
+function backToAppSelection() {
+    // Clean up any running session before going back
+    if (ActivitiesMode) ActivitiesMode.end();
+    if (StoryMode) StoryMode.end();
+    ContinuousSynth.stop();
+    
+    // Clear canvas
+    if (DOM.ctx) {
+        DOM.ctx.clearRect(0, 0, DOM.canvas.width, DOM.canvas.height);
+    }
+    
+    // Reset UI elements
+    DOM.navBar.style.display = 'none';
+    DOM.navBar.style.opacity = 0;
+    DOM.timerDisplay.style.display = 'none';
+    DOM.sunsetOverlay.style.opacity = 0;
+    
+    // Reset mode
+    currentMode = null;
+    setCurrentMode(null);
+    AppState.currentView = null;
+    
+    // Show selection screen
+    DOM.startScreenActivities.style.display = 'none';
+    DOM.startScreenStory.style.display = 'none';
+    DOM.appSelectionScreen.style.display = 'flex';
+    
+    trackVirtualPageView('/app-selection');
+}
+
+// =========================================================================
+// APPLICATION INITIALIZATION
+// =========================================================================
+
+function initApp() {
+    console.log('initApp starting...');
+    try {
+        console.log('Running initDOM...');
+        initDOM();
+        console.log('initDOM complete');
+        console.log('Running initParentMenu...');
         initParentMenu();
+        console.log('initParentMenu complete');
+        console.log('Running initAdminMode...');
         initAdminMode();
-        InputManager.init();
+        console.log('initAdminMode complete');
+        console.log('Running setupInputListeners...');
+        setupInputListeners();
+        console.log('setupInputListeners complete');
     } catch (error) {
         console.error('App initialization error:', error);
         if (typeof trackError === 'function') {
@@ -502,7 +416,7 @@ function initApp() {
         return;
     }
 
-    // Load saved preferences or use defaults
+    console.log('Loading preferences...');
     const savedPrefs = loadPreferences();
     const duration = savedPrefs?.duration ?? CONFIG.DEFAULT_SESSION_MINUTES;
     const sound = savedPrefs?.sound ?? SOUND_TYPES.DEEP;
@@ -520,52 +434,85 @@ function initApp() {
     changeEmergentEvents(emergentEvents);
     changeSensoryDimmerMode(sensoryDimmerMode);
 
-    // Track initial page view
+    console.log('Preferences loaded');
     trackPageView();
-    
-    // Setup engagement tracking
-    setupEngagementTracking();
+    console.log('Setting up event listeners...');
+    setupEventListeners();
+    console.log('initApp complete');
+}
 
-    // Begin button click handler
-    DOM.beginBtn.addEventListener('click', function () {
+function setupInputListeners() {
+    DOM.canvas.addEventListener('mouseup', e => handleInput(e, 'end'));
+    DOM.canvas.addEventListener('touchend', e => handleInput(e, 'end'));
+    DOM.canvas.addEventListener('mouseleave', e => handleInput(e, 'end'));
+    
+    DOM.canvas.addEventListener('mousedown', e => handleInput(e, 'start'));
+    DOM.canvas.addEventListener('touchstart', e => handleInput(e, 'start'), { passive: false });
+    DOM.canvas.addEventListener('mousemove', e => handleInput(e, 'move'));
+    DOM.canvas.addEventListener('touchmove', e => handleInput(e, 'move'), { passive: false });
+    
+    window.addEventListener('resize', handleResize);
+}
+
+function handleResize() {
+    if (ActivitiesMode) ActivitiesMode.handleResize();
+    if (StoryMode) StoryMode.handleResize();
+}
+
+function setupEventListeners() {
+    console.log('Setting up beginActivitiesBtn listener...');
+    DOM.beginActivitiesBtn.addEventListener('click', function () {
+        console.log('beginActivitiesBtn clicked!');
         try {
-            DOM.startScreen.style.display = 'none';
-            DOM.navBar.style.display = 'flex';
-            setTimeout(() => DOM.navBar.style.opacity = 1, 100);
-            InputManager.resize();
-        
-        const views = Object.values(VIEWS);
-        const randomView = views[Math.floor(Math.random() * views.length)];
-        ViewManager.switchView(randomView);
-        
-        AppState.isSessionRunning = true;
-        AppState.duration = AppState.sessionMinutes; // Set for analytics
-        AppState.soundType = AppState.currentSound; // Set for analytics
-        
-        // Generate session identifier and track session start
-        const sessionIdentifier = generateSessionIdentifier();
-        AppState.sessionIdentifier = sessionIdentifier; // Store for reference
-        if (DOM.sessionIdEl) {
-            DOM.sessionIdEl.textContent = `Session ID: ${sessionIdentifier}`;
-            DOM.sessionIdEl.style.display = 'block';
-        }
-        trackSessionStart(sessionIdentifier);
-        
+            // Clean up any existing mode before starting
+            if (StoryMode) StoryMode.end();
+            ContinuousSynth.stop();
+            
+            console.log('Calling AudioEngine.init()...');
             AudioEngine.init();
-            SensoryDimmer.init();
+            console.log('Calling setCurrentMode("activities")...');
+            setCurrentMode('activities');
+            currentMode = 'activities';
+            console.log('Calling animate()...');
             animate();
-            Timer.start(true);
+            console.log('Calling ActivitiesMode.start()...');
+            ActivitiesMode.start();
+            console.log('Activities mode started successfully!');
         } catch (error) {
-            console.error('Begin session error:', error);
-            if (typeof trackError === 'function') {
-                trackError(error, 'begin_session');
-            }
+            console.error('Begin activities error:', error);
+            trackError(error, 'begin_activities');
+        }
+    });
+
+    console.log('Setting up beginStoryBtn listener...');
+    DOM.beginStoryBtn.addEventListener('click', function () {
+        console.log('beginStoryBtn clicked!');
+        try {
+            // Clean up any existing mode before starting
+            if (ActivitiesMode) ActivitiesMode.end();
+            ContinuousSynth.stop();
+            
+            // No audio for story mode (will be added later)
+            console.log('Calling setCurrentMode("story")...');
+            setCurrentMode('story');
+            currentMode = 'story';
+            console.log('Calling animate()...');
+            animate();
+            console.log('Calling StoryMode.start()...');
+            StoryMode.start();
+            console.log('Story mode started successfully!');
+        } catch (error) {
+            console.error('Begin story error:', error);
+            trackError(error, 'begin_story');
         }
     });
 }
 
-// Make functions globally available for HTML inline handlers
-window.switchView = ViewManager.switchView;
+// =========================================================================
+// GLOBAL EXPORTS
+// =========================================================================
+
+window.switchView = ActivitiesMode ? ActivitiesMode.switchView : () => {};
 window.changeDuration = changeDuration;
 window.changeSound = changeSound;
 window.setSFX = setSFX;
@@ -585,13 +532,14 @@ window.showAdvancedOptions = showAdvancedOptions;
 window.showAdvancedOptionsFromSettings = showAdvancedOptionsFromSettings;
 window.closeAdvancedOptions = closeAdvancedOptions;
 
-// Maths challenge functions
 window.checkMathsAnswer = checkMathsAnswer;
 window.closeMathsChallenge = closeMathsChallenge;
 
-// Admin mode functions
 window.toggleAdminOverlay = toggleAdminOverlay;
 window.adminForceSunset = adminForceSunset;
+window.adminSwitchScene = adminSwitchScene;
 
-// Start application when DOM is ready
+window.selectApp = selectApp;
+window.backToAppSelection = backToAppSelection;
+
 document.addEventListener('DOMContentLoaded', initApp);

@@ -4,12 +4,13 @@
 
 /** Central application state object */
 export const AppState = {
+    // Session state
     sessionMinutes: 90,
     currentSound: 'deep',
     sfxEnabled: true,
     isPaused: false,
     isSessionRunning: false,
-    currentView: 'particles',
+    currentView: null,
     startTime: 0,
     elapsedSaved: 0,
     entities: [],
@@ -77,6 +78,9 @@ export function initDOM() {
     DOM.advancedOptionsModal = document.getElementById('advanced-options-modal');
     DOM.adminOverlay = document.getElementById('admin-overlay');
     DOM.startScreen = document.getElementById('start-screen');
+    DOM.appSelectionScreen = document.getElementById('app-selection-screen');
+    DOM.startScreenActivities = document.getElementById('start-screen-activities');
+    DOM.startScreenStory = document.getElementById('start-screen-story');
     DOM.timerDisplay = document.getElementById('timer-display');
     DOM.sessionIdEl = document.getElementById('session-id');
     DOM.pauseBtn = document.getElementById('pause-btn');
@@ -84,6 +88,8 @@ export function initDOM() {
     DOM.canvas = document.getElementById('main-canvas');
     DOM.sunsetOverlay = document.getElementById('sunset-overlay');
     DOM.beginBtn = document.getElementById('begin-btn');
+    DOM.beginActivitiesBtn = document.getElementById('begin-activities-btn');
+    DOM.beginStoryBtn = document.getElementById('begin-story-btn');
     DOM.mathsChallengeModal = document.getElementById('maths-challenge-modal');
     DOM.mathsQuestionEl = document.getElementById('maths-question');
     DOM.ctx = DOM.canvas.getContext('2d');

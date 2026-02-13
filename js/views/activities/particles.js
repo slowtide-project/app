@@ -1,5 +1,5 @@
-import { AppState, DOM } from '../state.js';
-import { CONFIG, VIEWS } from '../config.js';
+import { AppState, DOM } from '../../state.js';
+import { CONFIG, VIEWS } from '../../config.js';
 
 // Helper function to get density multiplier
 function getDensityMultiplier() {

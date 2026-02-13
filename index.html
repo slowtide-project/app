@@ -190,6 +190,7 @@
                 <h3>Debug Info</h3>
                 <div id="admin-debug-info" class="admin-info">
                     <p>Session: <span id="admin-session-status">No</span></p>
+                    <p>Mode: <span id="admin-current-mode">-</span></p>
                     <p>View: <span id="admin-current-view">-</span></p>
                     <p>Paused: <span id="admin-paused-status">No</span></p>
                     <p>Audio: <span id="admin-audio-status">-</span></p>
@@ -202,9 +203,19 @@
                     <button class="admin-btn" onclick="adminForceSunset()">Sunset OFF</button>
                 </div>
             </div>
+            <div class="admin-section">
+                <h3>Story Scenes</h3>
+                <div class="admin-actions">
+                    <button class="admin-btn" onclick="adminSwitchScene()">Switch Scene</button>
+                    <p class="admin-hint">Current: <span id="admin-current-scene">Forest</span></p>
+                </div>
+            </div>
         </div>
 
-        <div id="start-screen">
+        <!-- Legacy start screen (hidden, kept for compatibility) -->
+        <div id="start-screen" style="display: none;"></div>
+
+        <div id="app-selection-screen">
             <div id="update-btn" onclick="document.getElementById('update-modal').style.display='block'"><svg
                     viewBox="0 0 24 24">
                     <path
@@ -212,6 +223,25 @@
                 </svg></div>
             <div id="info-btn" onclick="document.getElementById('instructions-modal').style.display='block'">?</div>
             <h1 class="app-logo">SLOWTIDE</h1>
+            <div class="picker-section">
+                <p class="picker-label">Choose Your Experience</p>
+                <div class="app-selection-row">
+                    <button class="app-selection-btn" id="btn-activities" onclick="selectApp('activities')">
+                        <div class="app-icon">🎨</div>
+                        <div class="app-title">Activities</div>
+                        <div class="app-description">Interactive play and exploration</div>
+                    </button>
+                    <button class="app-selection-btn" id="btn-story" onclick="selectApp('story')">
+                        <div class="app-icon">🌲</div>
+                        <div class="app-title">Story</div>
+                        <div class="app-description">Peaceful forest scenes</div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="start-screen-activities" style="display: none;">
+            <h1 class="app-logo">ACTIVITIES</h1>
             <div class="picker-section">
                 <p class="picker-label">Duration</p>
                 <div class="start-opt-row">
@@ -243,7 +273,30 @@
                     <button class="start-btn" onclick="showAdvancedOptions()">Advanced Options</button>
                 </div>
             </div>
-            <div id="begin-btn">BEGIN SESSION</div>
+            <div class="start-opt-row">
+                <button class="start-btn back-btn" onclick="backToAppSelection()">← Back</button>
+                <div id="begin-activities-btn">BEGIN ACTIVITIES</div>
+            </div>
+        </div>
+
+        <div id="start-screen-story" style="display: none;">
+            <h1 class="app-logo">STORY</h1>
+            <div class="picker-section">
+                <p class="picker-label">Duration</p>
+                <div class="start-opt-row">
+                    <button class="start-btn time-btn" data-time="15" onclick="changeDuration(15)">15m</button>
+                    <button class="start-btn time-btn" data-time="30" onclick="changeDuration(30)">30m</button>
+                    <button class="start-btn time-btn" data-time="60" onclick="changeDuration(60)">60m</button>
+                </div>
+                <div class="start-opt-row">
+                    <button class="start-btn time-btn" data-time="90" onclick="changeDuration(90)">90m</button>
+                    <button class="start-btn time-btn" data-time="120" onclick="changeDuration(120)">120m</button>
+                </div>
+            </div>
+            <div class="start-opt-row">
+                <button class="start-btn back-btn" onclick="backToAppSelection()">← Back</button>
+                <div id="begin-story-btn">BEGIN STORY</div>
+            </div>
         </div>
 
         <div id="nav-bar">

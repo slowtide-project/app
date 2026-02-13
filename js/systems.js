@@ -1,15 +1,23 @@
-import { AppState, DOM, AudioState } from './state.js';
-import { CONFIG, VIEWS } from './config.js';
-import { ContinuousSynth } from './audio.js';
-import { Particles } from './views/particles.js';
-import { Bubbles } from './views/bubbles.js';
-import { Liquid } from './views/liquid.js';
-import { Sorting } from './views/sorting.js';
-import { Marbles } from './views/marbles.js';
-import { SensoryDimmer } from './sensory-dimmer.js';
-import { trackActivitySwitch, trackSessionEnd, trackEngagement } from './analytics.js';
+// =========================================================================
+// Shared systems - Timer only (mode-specific logic moved to mode files)
+// =========================================================================
 
-/** Session timer management */
+import { AppState, DOM, AudioState } from './state.js';
+import { CONFIG } from './config.js';
+import { SensoryDimmer } from './sensory-dimmer.js';
+import { trackSessionEnd } from './analytics.js';
+
+let currentMode = null;
+
+export function setCurrentMode(mode) {
+    currentMode = mode;
+}
+
+export function getCurrentMode() {
+    return currentMode;
+}
+
+/** Session timer management - mode aware */
 export const Timer = {
     /**
      * Start the session timer
@@ -21,13 +29,20 @@ export const Timer = {
             AppState.startTime = Date.now(); 
             AppState.elapsedSaved = 0; 
         }
-        this.updateDisplay();
-        AppState.timerInterval = setInterval(() => { 
-            this.updateDisplay(); 
-            this.checkSunset(); 
-            IdleManager.checkIdle(); 
-            SensoryDimmer.updatePhase(); 
-        }, 1000);
+        
+        // Only run timer for activities mode
+        if (currentMode === 'activities') {
+            this.updateDisplay();
+            AppState.timerInterval = setInterval(() => { 
+                this.updateDisplay(); 
+                this.checkSunset(); 
+                
+                // Activities-specific: call sensory dimmer update
+                if (typeof SensoryDimmer !== 'undefined') {
+                    SensoryDimmer.updatePhase(); 
+                }
+            }, 1000);
+        }
     },
 
     /**
@@ -41,7 +56,6 @@ export const Timer = {
         DOM.pauseBtn.className = "action-btn resume-btn";
         DOM.timerDisplay.innerText += " (PAUSED)";
         
-        // Track pause behavior
         if (typeof trackPause === 'function') {
             trackPause(true);
         }
@@ -57,7 +71,6 @@ export const Timer = {
         DOM.pauseBtn.innerText = "Pause Session";
         DOM.pauseBtn.className = "action-btn pause-btn";
         
-        // Track resume behavior
         if (typeof trackPause === 'function') {
             trackPause(false);
         }
@@ -76,6 +89,8 @@ export const Timer = {
      */
     updateDisplay() {
         if (!AppState.isSessionRunning) return;
+        if (currentMode === 'story') return; // No timer for story mode
+        
         const totalSeconds = AppState.sessionMinutes * 60;
         const currentSessionElapsed = AppState.isPaused ? 
             (AppState.elapsedSaved / 1000) : this.getCurrentElapsed();
@@ -92,15 +107,17 @@ export const Timer = {
      */
     checkSunset() {
         if (AppState.isPaused) return;
+        // Only run sunset for activities mode
+        if (currentMode !== 'activities') return;
+        
         const totalSeconds = AppState.sessionMinutes * 60;
         const elapsed = this.getCurrentElapsed();
         let progress = elapsed / totalSeconds;
         if (progress > 1) {
             progress = 1;
-            // Track session completion when timer expires
             if (AppState.isSessionRunning) {
-                trackSessionEnd(true); // Session completed successfully
-                AppState.isSessionRunning = false; // Prevent multiple tracking
+                trackSessionEnd(true);
+                AppState.isSessionRunning = false;
             }
         }
         if (progress > CONFIG.SUNSET_FADE_START_RATIO) {
@@ -114,124 +131,5 @@ export const Timer = {
     }
 };
 
-/** Ghost interaction handler mapping by view type */
-const GhostInteractionHandlers = {
-    [VIEWS.PARTICLES]: () => {
-        const cx = Math.random() * DOM.canvas.width;
-        const cy = Math.random() * DOM.canvas.height;
-        Particles.spawn(cx, cy);
-    },
-    [VIEWS.BUBBLES]: () => Bubbles.spawn(),
-    [VIEWS.LIQUID]: () => {
-        const cx = Math.random() * DOM.canvas.width;
-        const cy = Math.random() * DOM.canvas.height;
-        Liquid.handleStart(cx, cy);
-    },
-    [VIEWS.SORTING]: () => {
-        if (AppState.entities.length > 0) {
-            const s = AppState.entities[Math.floor(Math.random() * AppState.entities.length)];
-            s.dx += (Math.random() - 0.5) * CONFIG.GHOST_IMPULSE_SORTING;
-            s.dy += (Math.random() - 0.5) * CONFIG.GHOST_IMPULSE_SORTING;
-            s.vAngle += (Math.random() - 0.5) * CONFIG.GHOST_ANGLE_IMPULSE;
-        }
-    },
-    [VIEWS.MARBLES]: () => {
-        if (AppState.entities.length > 0) {
-            const m = AppState.entities[Math.floor(Math.random() * AppState.entities.length)];
-            m.vx += (Math.random() - 0.5) * CONFIG.GHOST_IMPULSE_MARBLES;
-            m.vy += (Math.random() - 0.5) * CONFIG.GHOST_IMPULSE_MARBLES;
-        }
-    }
-};
-
-/** System for handling user inactivity */
-export const IdleManager = {
-    /**
-     * Check for idle state and trigger interactions
-     */
-    checkIdle() {
-        if (!AppState.isSessionRunning || AppState.isPaused) return;
-        let idleTime = Date.now() - AppState.lastInteraction;
-        if (idleTime > CONFIG.GHOST_INTERACTION_TIME && Math.random() < CONFIG.IDLE_INTERACTION_CHANCE) {
-            this.ghostInteraction();
-            // Track ghost interaction as engagement
-            trackEngagement('ghost_interaction');
-        }
-        
-        // Auto-switch logic based on parent setting
-        if (AppState.autoSwitchMode !== 'off') {
-            let switchTime = AppState.autoSwitchMode === 'long' ? 
-                CONFIG.IDLE_VIEW_SWITCH_TIME_LONG : CONFIG.IDLE_VIEW_SWITCH_TIME;
-            if (idleTime > switchTime) {
-                this.switchToRandomView();
-                trackEngagement('auto_switch');
-            }
-        }
-    },
-
-    /**
-     * Switch to a random different view
-     */
-    switchToRandomView() {
-        const views = Object.values(VIEWS);
-        let next = views[Math.floor(Math.random() * views.length)];
-        while (next === AppState.currentView) {
-            next = views[Math.floor(Math.random() * views.length)];
-        }
-        ViewManager.switchView(next);
-        AppState.lastInteraction = Date.now() - CONFIG.GHOST_INTERACTION_TIME;
-    },
-
-    /**
-     * Trigger simulated interaction for engagement
-     */
-    ghostInteraction() {
-        const handler = GhostInteractionHandlers[AppState.currentView];
-        if (handler) handler();
-    }
-};
-
-/** View initialization handler mapping */
-const ViewInitHandlers = {
-    [VIEWS.SORTING]: () => Sorting.init(),
-    [VIEWS.BUBBLES]: () => Bubbles.init(),
-    [VIEWS.MARBLES]: () => Marbles.init()
-};
-
-/** View switching and management */
-export const ViewManager = {
-    /**
-     * Switch to a different activity view
-     * @param {string} viewName - View name from VIEWS
-     */
-    switchView(viewName) {
-        const previousView = AppState.currentView;
-        AppState.currentView = viewName;
-        document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
-        const btn = document.getElementById(`btn-${viewName}`);
-        if (btn) btn.classList.add('active');
-        AppState.entities = [];
-        
-        const initHandler = ViewInitHandlers[viewName];
-        if (initHandler) initHandler();
-        
-        // Track activity switch (but not for initial random selection)
-        if (AppState.isSessionRunning && previousView !== undefined) {
-            trackActivitySwitch(viewName);
-        } else if (AppState.isSessionRunning) {
-            // Track initial activity selection as page view
-            const activityTitles = {
-                'particles': 'Particles Activity',
-                'sorting': 'Sorting Activity', 
-                'bubbles': 'Bubbles Activity',
-                'liquid': 'Liquid Activity',
-                'marbles': 'Marbles Activity'
-            };
-            const activityTitle = activityTitles[viewName] || viewName;
-            trackVirtualPageView(activityTitle, {
-                activity_name: viewName,
-                transition_type: 'session_start'
-            });
-        }
-    }
-};
+// Export for activities mode
+export { currentMode };

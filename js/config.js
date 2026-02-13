@@ -149,7 +149,12 @@ export const VIEWS = {
     SORTING: 'sorting',
     BUBBLES: 'bubbles',
     LIQUID: 'liquid',
-    MARBLES: 'marbles'
+    MARBLES: 'marbles',
+    FOREST: 'forest',
+    BEACH: 'beach',
+    MEADOW: 'meadow',
+    NIGHT: 'night',
+    LAKE: 'lake'
 };
 
 export const BEHAVIOR_PATTERNS = {
