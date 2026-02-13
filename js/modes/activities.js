@@ -1,11 +1,10 @@
 // =========================================================================
-// Activities Mode - Interactive activities with sensory dimmer, auto-switch, idle/ghost
+// Activities Mode - Interactive activities with auto-switch, idle/ghost
 // =========================================================================
 
 import { AppState, DOM } from '../state.js';
 import { CONFIG, VIEWS } from '../config.js';
 import { AudioEngine, ContinuousSynth } from '../audio.js';
-import { SensoryDimmer } from '../sensory-dimmer.js';
 import { Timer } from '../systems.js';
 import { trackSessionStart, trackActivitySwitch, trackEngagement, trackVirtualPageView, generateSessionIdentifier } from '../analytics.js';
 import { Particles } from '../views/activities/particles.js';
@@ -121,11 +120,7 @@ const UpdateHandlers = {
 
 // Helper function to get density multiplier
 export function getDensityMultiplier() {
-    switch(AppState.visualDensity) {
-        case 'minimal': return ACTIVITIES_CONFIG.DENSITY_MULTIPLIERS.minimal;
-        case 'rich': return ACTIVITIES_CONFIG.DENSITY_MULTIPLIERS.rich;
-        default: return ACTIVITIES_CONFIG.DENSITY_MULTIPLIERS.standard;
-    }
+    return ACTIVITIES_CONFIG.DENSITY_MULTIPLIERS.rich;
 }
 
 // Activities Mode Controller
@@ -230,14 +225,10 @@ export const ActivitiesMode = {
             trackEngagement('ghost_interaction');
         }
         
-        // Auto-switch logic based on parent setting
-        if (AppState.autoSwitchMode !== 'off') {
-            let switchTime = AppState.autoSwitchMode === 'long' ? 
-                CONFIG.IDLE_VIEW_SWITCH_TIME_LONG : CONFIG.IDLE_VIEW_SWITCH_TIME;
-            if (idleTime > switchTime) {
-                this.switchToRandomView();
-                trackEngagement('auto_switch');
-            }
+        // Auto-switch logic (always on)
+        if (idleTime > CONFIG.IDLE_VIEW_SWITCH_TIME) {
+            this.switchToRandomView();
+            trackEngagement('auto_switch');
         }
     },
 
@@ -291,9 +282,6 @@ export const ActivitiesMode = {
         if (AppState.currentSound !== 'off') {
             ContinuousSynth.start(AppState.currentSound);
         }
-        
-        // Initialize sensory dimmer
-        SensoryDimmer.init();
         
         if (typeof trackSessionStart === 'function') {
             trackSessionStart(sessionIdentifier);

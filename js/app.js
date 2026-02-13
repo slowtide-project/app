@@ -6,11 +6,10 @@ import { CONFIG, SOUND_TYPES, VIEWS } from './config.js';
 import { AppState, AudioState, DOM, initDOM } from './state.js';
 import { AudioEngine, ContinuousSynth } from './audio.js';
 import { savePreferences, loadPreferences } from './storage.js';
-import { Timer, setCurrentMode } from './systems.js';
-import { SensoryDimmer } from './sensory-dimmer.js';
-import { initAdminMode, toggleAdminOverlay, adminForceSunset, adminSwitchScene } from './admin.js';
+import { Timer, setCurrentMode, getCurrentMode } from './systems.js';
+import { initAdminMode, toggleAdminOverlay, adminSwitchScene } from './admin.js';
 import { generateMathsQuestion } from './utils.js';
-import { trackPageView, trackVirtualPageView, trackError, trackDurationChange, trackAtmosphereChange, trackSFXChange, trackParentSettingChange } from './analytics.js';
+import { trackPageView, trackVirtualPageView, trackError, trackDurationChange, trackAtmosphereChange, trackSFXChange } from './analytics.js';
 
 import { ActivitiesMode } from './modes/activities.js';
 import { StoryMode } from './modes/story.js';
@@ -126,71 +125,10 @@ function setSFX(val) {
     trackSFXChange(AppState.sfxEnabled);
 }
 
-function changeBehaviorPattern(pattern) {
-    const oldPattern = AppState.behaviorPattern;
-    AppState.behaviorPattern = pattern;
-    document.querySelectorAll('.pattern-btn').forEach(b => {
-        b.classList.remove('selected');
-        if (b.getAttribute('data-pattern') === pattern) b.classList.add('selected');
-    });
-    saveAllPreferences();
-    trackParentSettingChange('behavior_pattern', oldPattern || 'chaos', pattern);
-}
-
-function changeAutoSwitchMode(mode) {
-    const oldMode = AppState.autoSwitchMode;
-    AppState.autoSwitchMode = mode;
-    document.querySelectorAll('.switch-btn').forEach(b => {
-        b.classList.remove('selected');
-        if (b.getAttribute('data-switch') === mode) b.classList.add('selected');
-    });
-    saveAllPreferences();
-    trackParentSettingChange('auto_switch_mode', oldMode || 'on', mode);
-}
-
-function changeVisualDensity(density) {
-    const oldDensity = AppState.visualDensity;
-    AppState.visualDensity = density;
-    document.querySelectorAll('.density-btn').forEach(b => {
-        b.classList.remove('selected');
-        if (b.getAttribute('data-density') === density) b.classList.add('selected');
-    });
-    ActivitiesMode.switchView(AppState.currentView);
-    saveAllPreferences();
-    trackParentSettingChange('visual_density', oldDensity || 'standard', density);
-}
-
-function changeEmergentEvents(events) {
-    const oldEvents = AppState.emergentEvents;
-    AppState.emergentEvents = events;
-    document.querySelectorAll('.emergent-btn').forEach(b => {
-        b.classList.remove('selected');
-        if (b.getAttribute('data-emergent') === events) b.classList.add('selected');
-    });
-    saveAllPreferences();
-    trackParentSettingChange('emergent_events', oldEvents || 'off', events);
-}
-
-function changeSensoryDimmerMode(mode) {
-    const oldMode = AppState.sensoryDimmerMode;
-    AppState.sensoryDimmerMode = mode;
-    document.querySelectorAll('.dimmer-btn').forEach(b => {
-        b.classList.remove('selected');
-        if (b.getAttribute('data-dimmer') === mode) b.classList.add('selected');
-    });
-    saveAllPreferences();
-    trackParentSettingChange('sensory_dimmer_mode', oldMode || 'auto', mode);
-}
-
 function saveAllPreferences() {
     savePreferences({
         duration: AppState.sessionMinutes,
-        sound: AppState.currentSound,
-        behaviorPattern: AppState.behaviorPattern,
-        autoSwitchMode: AppState.autoSwitchMode,
-        visualDensity: AppState.visualDensity,
-        emergentEvents: AppState.emergentEvents,
-        sensoryDimmerMode: AppState.sensoryDimmerMode
+        sound: AppState.currentSound
     });
 }
 
@@ -236,73 +174,6 @@ function performUpdate() {
     
     const timestamp = new Date().getTime();
     window.location.href = window.location.origin + window.location.pathname + '?v=' + timestamp;
-}
-
-function showAdvancedOptions() {
-    DOM.advancedOptionsModal.style.display = 'block';
-    trackVirtualPageView('Advanced Options');
-}
-
-function showAdvancedOptionsFromSettings() {
-    DOM.settingsModal.style.display = 'none';
-    DOM.advancedOptionsModal.style.display = 'block';
-    trackVirtualPageView('Advanced Options');
-}
-
-function closeAdvancedOptions() {
-    DOM.advancedOptionsModal.style.display = 'none';
-    if (AppState.isSessionRunning) {
-        DOM.settingsModal.style.display = 'block';
-        trackVirtualPageView('Settings Modal');
-    } else {
-        trackVirtualPageView('Start Screen');
-    }
-}
-
-function resetApp() {
-    DOM.confirmModal.style.display = 'none';
-    
-    // Stop all audio
-    ContinuousSynth.stop();
-    if (AudioState.context) AudioState.context.suspend();
-    if (AudioState.noiseSource) try { AudioState.noiseSource.stop(); } catch (e) { }
-    
-    // Clear timer
-    clearInterval(AppState.timerInterval);
-    
-    // End both modes (cleanup)
-    if (ActivitiesMode) ActivitiesMode.end();
-    if (StoryMode) StoryMode.end();
-    
-    // Reset all state
-    AppState.isSessionRunning = false; 
-    AppState.isPaused = false; 
-    AppState.elapsedSaved = 0;
-    AppState.entities = [];
-    AppState.currentView = null;
-    
-    // Reset UI elements
-    DOM.sunsetOverlay.style.opacity = 0;
-    DOM.navBar.style.display = 'none'; 
-    DOM.navBar.style.opacity = 0;
-    DOM.timerDisplay.style.display = 'none';
-    
-    // Clear canvas
-    if (DOM.ctx) {
-        DOM.ctx.clearRect(0, 0, DOM.canvas.width, DOM.canvas.height);
-    }
-    
-    // Hide all screens
-    DOM.startScreenActivities.style.display = 'none';
-    DOM.startScreenStory.style.display = 'none';
-    DOM.appSelectionScreen.style.display = 'flex';
-    
-    // Reset mode
-    currentMode = null;
-    setCurrentMode(null);
-    
-    DOM.pauseBtn.innerText = "Pause Session";
-    DOM.pauseBtn.className = "action-btn pause-btn";
 }
 
 // =========================================================================
@@ -374,7 +245,6 @@ function backToAppSelection() {
     DOM.navBar.style.display = 'none';
     DOM.navBar.style.opacity = 0;
     DOM.timerDisplay.style.display = 'none';
-    DOM.sunsetOverlay.style.opacity = 0;
     
     // Reset mode
     currentMode = null;
@@ -420,19 +290,9 @@ function initApp() {
     const savedPrefs = loadPreferences();
     const duration = savedPrefs?.duration ?? CONFIG.DEFAULT_SESSION_MINUTES;
     const sound = savedPrefs?.sound ?? SOUND_TYPES.DEEP;
-    const behaviorPattern = savedPrefs?.behaviorPattern ?? CONFIG.DEFAULT_BEHAVIOR_PATTERN;
-    const autoSwitchMode = savedPrefs?.autoSwitchMode ?? CONFIG.DEFAULT_AUTO_SWITCH_MODE;
-    const visualDensity = savedPrefs?.visualDensity ?? CONFIG.DEFAULT_VISUAL_DENSITY;
-    const emergentEvents = savedPrefs?.emergentEvents ?? CONFIG.DEFAULT_EMERGENT_EVENTS;
-    const sensoryDimmerMode = savedPrefs?.sensoryDimmerMode ?? CONFIG.DEFAULT_SENSORY_DIMMER_MODE;
     
     changeDuration(duration);
     changeSound(sound);
-    changeBehaviorPattern(behaviorPattern);
-    changeAutoSwitchMode(autoSwitchMode);
-    changeVisualDensity(visualDensity);
-    changeEmergentEvents(emergentEvents);
-    changeSensoryDimmerMode(sensoryDimmerMode);
 
     console.log('Preferences loaded');
     trackPageView();
@@ -455,8 +315,12 @@ function setupInputListeners() {
 }
 
 function handleResize() {
-    if (ActivitiesMode) ActivitiesMode.handleResize();
-    if (StoryMode) StoryMode.handleResize();
+    const mode = getCurrentMode();
+    if (mode === 'activities' && ActivitiesMode) {
+        ActivitiesMode.handleResize();
+    } else if (mode === 'story' && StoryMode) {
+        StoryMode.handleResize();
+    }
 }
 
 function setupEventListeners() {
@@ -512,31 +376,56 @@ function setupEventListeners() {
 // GLOBAL EXPORTS
 // =========================================================================
 
+function resetApp() {
+    if (ActivitiesMode) ActivitiesMode.end();
+    if (StoryMode) StoryMode.end();
+    ContinuousSynth.stop();
+    
+    if (DOM.ctx) {
+        DOM.ctx.clearRect(0, 0, DOM.canvas.width, DOM.canvas.height);
+    }
+    
+    DOM.settingsModal.style.display = 'none';
+    DOM.confirmModal.style.display = 'none';
+    DOM.navBar.style.display = 'none';
+    DOM.navBar.style.opacity = 0;
+    DOM.timerDisplay.style.display = 'none';
+    
+    AppState.isSessionRunning = false;
+    AppState.isPaused = false;
+    AppState.currentView = null;
+    AppState.entities = [];
+    
+    if (AppState.timerInterval) {
+        clearInterval(AppState.timerInterval);
+        AppState.timerInterval = null;
+    }
+    
+    currentMode = null;
+    setCurrentMode(null);
+    
+    DOM.startScreenActivities.style.display = 'none';
+    DOM.startScreenStory.style.display = 'none';
+    DOM.appSelectionScreen.style.display = 'flex';
+    
+    trackVirtualPageView('/app-selection');
+}
+
 window.switchView = ActivitiesMode ? ActivitiesMode.switchView : () => {};
 window.changeDuration = changeDuration;
 window.changeSound = changeSound;
 window.setSFX = setSFX;
-window.changeBehaviorPattern = changeBehaviorPattern;
-window.changeAutoSwitchMode = changeAutoSwitchMode;
-window.changeVisualDensity = changeVisualDensity;
-window.changeEmergentEvents = changeEmergentEvents;
-window.changeSensoryDimmerMode = changeSensoryDimmerMode;
-window.SensoryDimmer = SensoryDimmer;
 window.togglePause = togglePause;
 window.closeSettings = closeSettings;
 window.showQuitConfirm = showQuitConfirm;
 window.closeQuitConfirm = closeQuitConfirm;
 window.resetApp = resetApp;
 window.performUpdate = performUpdate;
-window.showAdvancedOptions = showAdvancedOptions;
-window.showAdvancedOptionsFromSettings = showAdvancedOptionsFromSettings;
-window.closeAdvancedOptions = closeAdvancedOptions;
 
 window.checkMathsAnswer = checkMathsAnswer;
 window.closeMathsChallenge = closeMathsChallenge;
 
 window.toggleAdminOverlay = toggleAdminOverlay;
-window.adminForceSunset = adminForceSunset;
 window.adminSwitchScene = adminSwitchScene;
 
 window.selectApp = selectApp;

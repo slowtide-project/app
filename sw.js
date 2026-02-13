@@ -17,7 +17,6 @@ const STATIC_ASSETS = [
     './js/utils.js',
     './js/admin.js',
     './js/analytics.js',
-    './js/sensory-dimmer.js',
     './js/modes/activities.js',
     './js/modes/story.js',
     './js/views/activities/particles.js',

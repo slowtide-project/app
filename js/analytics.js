@@ -38,9 +38,9 @@ export async function trackSessionStart(sessionIdentifier = null) {
         input_type: deviceInfo.input_type,
         connection_type: deviceInfo.connection_type,
         battery_level: deviceInfo.battery_level,
-        behavior_pattern: AppState.behaviorPattern || 'chaos',
-        auto_switch_mode: AppState.autoSwitchMode || 'on',
-        visual_density: AppState.visualDensity || 'standard'
+        behavior_pattern: 'chaos',
+        auto_switch_mode: 'on',
+        visual_density: 'rich'
     });
     
     AppState.sessionStartTime = Date.now();

@@ -3,8 +3,6 @@
 // =========================================================================
 
 import { AppState, DOM, AudioState } from './state.js';
-import { CONFIG } from './config.js';
-import { SensoryDimmer } from './sensory-dimmer.js';
 import { trackSessionEnd } from './analytics.js';
 
 let currentMode = null;
@@ -35,12 +33,6 @@ export const Timer = {
             this.updateDisplay();
             AppState.timerInterval = setInterval(() => { 
                 this.updateDisplay(); 
-                this.checkSunset(); 
-                
-                // Activities-specific: call sensory dimmer update
-                if (typeof SensoryDimmer !== 'undefined') {
-                    SensoryDimmer.updatePhase(); 
-                }
             }, 1000);
         }
     },
@@ -95,39 +87,20 @@ export const Timer = {
         const currentSessionElapsed = AppState.isPaused ? 
             (AppState.elapsedSaved / 1000) : this.getCurrentElapsed();
         let remaining = totalSeconds - currentSessionElapsed;
-        if (remaining < 0) remaining = 0;
-        let rMin = Math.floor(remaining / 60);
-        let rSec = Math.floor(remaining % 60);
-        DOM.timerDisplay.innerText = `Time Left: ${rMin}m ${rSec < 10 ? '0' : ''}${rSec}s` + 
-            (AppState.isPaused ? " (PAUSED)" : "");
-    },
-
-    /**
-     * Check and apply sunset fade effects
-     */
-    checkSunset() {
-        if (AppState.isPaused) return;
-        // Only run sunset for activities mode
-        if (currentMode !== 'activities') return;
         
-        const totalSeconds = AppState.sessionMinutes * 60;
-        const elapsed = this.getCurrentElapsed();
-        let progress = elapsed / totalSeconds;
-        if (progress > 1) {
-            progress = 1;
+        // Check if session is complete
+        if (remaining <= 0) {
+            remaining = 0;
             if (AppState.isSessionRunning) {
                 trackSessionEnd(true);
                 AppState.isSessionRunning = false;
             }
         }
-        if (progress > CONFIG.SUNSET_FADE_START_RATIO) {
-            const fade = (progress - CONFIG.SUNSET_FADE_START_RATIO) * 2;
-            DOM.sunsetOverlay.style.opacity = fade * 0.98;
-            if (AppState.currentSound !== 'off' && AudioState.gainNode) {
-                const multipliers = SensoryDimmer.getPhaseMultipliers();
-                AudioState.gainNode.gain.value = 0.8 * (1 - fade) * multipliers.volume;
-            }
-        }
+        
+        let rMin = Math.floor(remaining / 60);
+        let rSec = Math.floor(remaining % 60);
+        DOM.timerDisplay.innerText = `Time Left: ${rMin}m ${rSec < 10 ? '0' : ''}${rSec}s` + 
+            (AppState.isPaused ? " (PAUSED)" : "");
     }
 };
 

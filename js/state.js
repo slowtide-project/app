@@ -17,15 +17,6 @@ export const AppState = {
     lastInteraction: Date.now(),
     lastSFX: 0,
     timerInterval: null,
-    // Parent-configurable settings
-    behaviorPattern: 'chaos',
-    autoSwitchMode: 'on',
-    visualDensity: 'standard',
-    emergentEvents: 'off',
-    // Sensory dimmer settings
-    sensoryDimmerMode: 'auto',
-    currentEngagementPhase: 'high',
-    phaseStartTime: 0,
     // Session tracking
     sessionIdentifier: null,
     // Maths challenge state
@@ -53,7 +44,6 @@ export const DOM = {
     confirmModal: null,
     updateModal: null,
     instructionsModal: null,
-    advancedOptionsModal: null,
     adminOverlay: null,
     startScreen: null,
     timerDisplay: null,
@@ -61,7 +51,6 @@ export const DOM = {
     pauseBtn: null,
     navBar: null,
     canvas: null,
-    sunsetOverlay: null,
     beginBtn: null,
     mathsChallengeModal: null,
     mathsQuestionEl: null,
@@ -75,7 +64,6 @@ export function initDOM() {
     DOM.confirmModal = document.getElementById('confirm-modal');
     DOM.updateModal = document.getElementById('update-modal');
     DOM.instructionsModal = document.getElementById('instructions-modal');
-    DOM.advancedOptionsModal = document.getElementById('advanced-options-modal');
     DOM.adminOverlay = document.getElementById('admin-overlay');
     DOM.startScreen = document.getElementById('start-screen');
     DOM.appSelectionScreen = document.getElementById('app-selection-screen');
@@ -86,7 +74,6 @@ export function initDOM() {
     DOM.pauseBtn = document.getElementById('pause-btn');
     DOM.navBar = document.getElementById('nav-bar');
     DOM.canvas = document.getElementById('main-canvas');
-    DOM.sunsetOverlay = document.getElementById('sunset-overlay');
     DOM.beginBtn = document.getElementById('begin-btn');
     DOM.beginActivitiesBtn = document.getElementById('begin-activities-btn');
     DOM.beginStoryBtn = document.getElementById('begin-story-btn');

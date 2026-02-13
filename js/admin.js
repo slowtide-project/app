@@ -9,7 +9,6 @@ import { getCurrentMode } from './systems.js';
 
 /** Admin mode state */
 const AdminMode = {
-    sunsetForced: false,
     updateInterval: null
 };
 
@@ -58,20 +57,6 @@ function updateAdminDebugInfo() {
     document.getElementById('admin-paused-status').textContent = AppState.isPaused ? 'Yes' : 'No';
     document.getElementById('admin-audio-status').textContent = AudioState.context ? AudioState.context.state : 'Not Initialized';
     document.getElementById('admin-entities-count').textContent = AppState.entities.length;
-}
-
-/**
- * Admin action: Toggle sunset overlay on/off
- */
-export function adminForceSunset() {
-    AdminMode.sunsetForced = !AdminMode.sunsetForced;
-    DOM.sunsetOverlay.style.opacity = AdminMode.sunsetForced ? 1 : 0;
-    
-    const btn = document.querySelector('#admin-overlay .admin-btn[onclick="adminForceSunset()"]');
-    if (btn) {
-        btn.textContent = AdminMode.sunsetForced ? 'Sunset ON' : 'Sunset OFF';
-        btn.classList.toggle('active', AdminMode.sunsetForced);
-    }
 }
 
 /**
