@@ -252,8 +252,8 @@ export const ActivitiesMode = {
         DOM.startScreenActivities.style.display = 'none';
         
         // Show nav bar
-        DOM.navBar.style.display = 'flex';
-        setTimeout(() => DOM.navBar.style.opacity = 1, 100);
+        DOM.navBarActivities.style.display = 'flex';
+        setTimeout(() => DOM.navBarActivities.style.opacity = 1, 100);
         
         // Show timer for activities mode
         DOM.timerDisplay.style.display = 'block';
@@ -306,8 +306,8 @@ export const ActivitiesMode = {
         DOM.ctx.clearRect(0, 0, DOM.canvas.width, DOM.canvas.height);
         
         // Hide nav bar
-        DOM.navBar.style.display = 'none';
-        DOM.navBar.style.opacity = 0;
+        DOM.navBarActivities.style.display = 'none';
+        DOM.navBarActivities.style.opacity = 0;
     },
 
     /**

@@ -49,7 +49,8 @@ export const DOM = {
     timerDisplay: null,
     sessionIdEl: null,
     pauseBtn: null,
-    navBar: null,
+    navBarActivities: null,
+    navBarStory: null,
     canvas: null,
     beginBtn: null,
     mathsChallengeModal: null,
@@ -72,7 +73,8 @@ export function initDOM() {
     DOM.timerDisplay = document.getElementById('timer-display');
     DOM.sessionIdEl = document.getElementById('session-id');
     DOM.pauseBtn = document.getElementById('pause-btn');
-    DOM.navBar = document.getElementById('nav-bar');
+    DOM.navBarActivities = document.getElementById('nav-bar-activities');
+    DOM.navBarStory = document.getElementById('nav-bar-story');
     DOM.canvas = document.getElementById('main-canvas');
     DOM.beginBtn = document.getElementById('begin-btn');
     DOM.beginActivitiesBtn = document.getElementById('begin-activities-btn');

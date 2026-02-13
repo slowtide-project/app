@@ -222,8 +222,10 @@ function backToAppSelection() {
     }
     
     // Reset UI elements
-    DOM.navBar.style.display = 'none';
-    DOM.navBar.style.opacity = 0;
+    DOM.navBarActivities.style.display = 'none';
+    DOM.navBarActivities.style.opacity = 0;
+    DOM.navBarStory.style.display = 'none';
+    DOM.navBarStory.style.opacity = 0;
     DOM.timerDisplay.style.display = 'none';
     
     AppState.currentView = null;
@@ -360,8 +362,10 @@ function resetApp() {
     
     DOM.settingsModal.style.display = 'none';
     DOM.confirmModal.style.display = 'none';
-    DOM.navBar.style.display = 'none';
-    DOM.navBar.style.opacity = 0;
+    DOM.navBarActivities.style.display = 'none';
+    DOM.navBarActivities.style.opacity = 0;
+    DOM.navBarStory.style.display = 'none';
+    DOM.navBarStory.style.opacity = 0;
     DOM.timerDisplay.style.display = 'none';
     
     AppState.isSessionRunning = false;

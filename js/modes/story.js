@@ -68,6 +68,11 @@ export const StoryMode = {
         AppState.currentView = sceneName;
         AppState.entities = [];
         
+        // Update nav button active state
+        document.querySelectorAll('#nav-bar-story .nav-btn').forEach(el => el.classList.remove('active'));
+        const btn = document.getElementById(`btn-${sceneName}`);
+        if (btn) btn.classList.add('active');
+        
         const initHandler = SceneInitHandlers[sceneName];
         if (initHandler) initHandler();
         
@@ -76,7 +81,7 @@ export const StoryMode = {
             const sceneTitle = SCENE_TITLES[sceneName] || sceneName;
             trackVirtualPageView(sceneTitle, {
                 scene_name: sceneName,
-                transition_type: 'admin_switch'
+                transition_type: 'nav_switch'
             });
         }
     },
@@ -119,6 +124,10 @@ export const StoryMode = {
         // Hide timer for story mode
         DOM.timerDisplay.style.display = 'none';
         
+        // Show story nav bar
+        DOM.navBarStory.style.display = 'flex';
+        setTimeout(() => DOM.navBarStory.style.opacity = 1, 100);
+        
         // Resize canvas
         this.resizeCanvas();
         
@@ -157,6 +166,10 @@ export const StoryMode = {
         
         // Hide timer (though it's already hidden for story)
         DOM.timerDisplay.style.display = 'none';
+        
+        // Hide story nav bar
+        DOM.navBarStory.style.display = 'none';
+        DOM.navBarStory.style.opacity = 0;
     },
 
     /**

@@ -31,7 +31,8 @@ html {
    NAVIGATION BAR
    ========================================================================= */
 
-#nav-bar {
+#nav-bar-activities,
+#nav-bar-story {
     position: fixed;
     bottom: 30px;
     left: 0;
@@ -412,6 +413,33 @@ canvas {
     max-width: 180px;
 }
 
+.back-btn-top {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: transparent;
+    border: none;
+    color: #888;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 10px 15px;
+    z-index: 100;
+}
+
+.screen-content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 500px;
+    padding: 40px 20px;
+}
+
+.back-btn-top:hover {
+    color: #bbb;
+}
+
 .back-btn:hover {
     border-color: #777 !important;
     color: #bbb !important;
@@ -429,13 +457,18 @@ canvas {
 }
 
 #start-screen-activities #begin-activities-btn,
-#start-screen-story #begin-story-btn,
-#start-screen-activities .back-btn,
-#start-screen-story .back-btn {
+#start-screen-story #begin-story-btn {
     flex: 1;
     text-align: center;
     box-sizing: border-box;
     padding: 15px 20px;
+    width: 100%;
+    max-width: 280px;
+}
+
+#start-screen-activities .start-opt-row:last-child,
+#start-screen-story .start-opt-row:last-child {
+    justify-content: center;
 }
 
 /* =========================================================================
@@ -731,7 +764,8 @@ canvas {
     word-break: break-all;
 }
 
-#nav-bar {
+#nav-bar-activities,
+#nav-bar-story {
     display: none;
     opacity: 0;
     transition: opacity 2s;
