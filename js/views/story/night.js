@@ -39,10 +39,10 @@ export const Night = {
     drawSky() {
         // Dark night sky with super moon glow
         const gradient = DOM.ctx.createLinearGradient(0, 0, 0, DOM.canvas.height * 0.7);
-        gradient.addColorStop(0, '#101025');    // Slightly lighter from moon glow
-        gradient.addColorStop(0.3, '#0A0A18');  // Dark blue
-        gradient.addColorStop(0.6, '#0F0F20');  // Dark purple-blue
-        gradient.addColorStop(1, '#181830');     // Lighter at horizon from moon
+        gradient.addColorStop(0, '#1E1E38');    // Lighter from moon glow
+        gradient.addColorStop(0.3, '#16162C');  // Dark blue
+        gradient.addColorStop(0.6, '#1A1A30');  // Dark purple-blue
+        gradient.addColorStop(1, '#222240');     // Lighter at horizon from moon
         
         DOM.ctx.fillStyle = gradient;
         DOM.ctx.fillRect(0, 0, DOM.canvas.width, DOM.canvas.height);
@@ -53,9 +53,9 @@ export const Night = {
         
         // Large outer glow
         const outerGlow = DOM.ctx.createRadialGradient(moonX, moonY, 0, moonX, moonY, 400);
-        outerGlow.addColorStop(0, 'rgba(255, 250, 220, 0.4)');
-        outerGlow.addColorStop(0.2, 'rgba(255, 245, 210, 0.25)');
-        outerGlow.addColorStop(0.5, 'rgba(255, 240, 200, 0.1)');
+        outerGlow.addColorStop(0, 'rgba(255, 250, 220, 0.5)');
+        outerGlow.addColorStop(0.2, 'rgba(255, 245, 210, 0.35)');
+        outerGlow.addColorStop(0.5, 'rgba(255, 240, 200, 0.15)');
         outerGlow.addColorStop(1, 'rgba(255, 235, 190, 0)');
         
         DOM.ctx.fillStyle = outerGlow;
@@ -63,8 +63,8 @@ export const Night = {
         
         // Medium glow
         const mediumGlow = DOM.ctx.createRadialGradient(moonX, moonY, 0, moonX, moonY, 200);
-        mediumGlow.addColorStop(0, 'rgba(255, 252, 240, 0.6)');
-        mediumGlow.addColorStop(0.5, 'rgba(255, 248, 230, 0.3)');
+        mediumGlow.addColorStop(0, 'rgba(255, 252, 240, 0.75)');
+        mediumGlow.addColorStop(0.5, 'rgba(255, 248, 230, 0.4)');
         mediumGlow.addColorStop(1, 'rgba(255, 245, 220, 0)');
         
         DOM.ctx.fillStyle = mediumGlow;
@@ -75,9 +75,9 @@ export const Night = {
             DOM.canvas.width * 0.5, DOM.canvas.height, 0,
             DOM.canvas.width * 0.5, DOM.canvas.height, DOM.canvas.width * 0.8
         );
-        horizonGlow.addColorStop(0, 'rgba(40, 40, 60, 0.2)');
-        horizonGlow.addColorStop(0.5, 'rgba(30, 30, 50, 0.1)');
-        horizonGlow.addColorStop(1, 'rgba(20, 20, 40, 0)');
+        horizonGlow.addColorStop(0, 'rgba(60, 60, 80, 0.25)');
+        horizonGlow.addColorStop(0.5, 'rgba(45, 45, 65, 0.12)');
+        horizonGlow.addColorStop(1, 'rgba(30, 30, 50, 0)');
         
         DOM.ctx.fillStyle = horizonGlow;
         DOM.ctx.fillRect(0, 0, DOM.canvas.width, DOM.canvas.height);
@@ -85,13 +85,13 @@ export const Night = {
     
     drawStars() {
         // Static stars - scattered across sky
-        for (let i = 0; i < 80; i++) {
+        for (let i = 0; i < 120; i++) {
             const x = Math.random() * DOM.canvas.width;
             const y = Math.random() * DOM.canvas.height * 0.6;
             const size = 0.5 + Math.random() * 1.5;
             
             // Varying brightness
-            const brightness = 0.3 + Math.random() * 0.7;
+            const brightness = 0.5 + Math.random() * 0.5;
             
             DOM.ctx.fillStyle = `rgba(255, 255, 240, ${brightness})`;
             DOM.ctx.beginPath();
@@ -100,22 +100,22 @@ export const Night = {
         }
         
         // A few brighter stars
-        for (let i = 0; i < 15; i++) {
+        for (let i = 0; i < 25; i++) {
             const x = Math.random() * DOM.canvas.width;
             const y = Math.random() * DOM.canvas.height * 0.5;
             const size = 1.5 + Math.random() * 1;
             
             // Star glow
-            const glowGrad = DOM.ctx.createRadialGradient(x, y, 0, x, y, size * 4);
-            glowGrad.addColorStop(0, 'rgba(255, 255, 250, 0.4)');
-            glowGrad.addColorStop(0.5, 'rgba(255, 255, 240, 0.1)');
+            const glowGrad = DOM.ctx.createRadialGradient(x, y, 0, x, y, size * 5);
+            glowGrad.addColorStop(0, 'rgba(255, 255, 250, 0.6)');
+            glowGrad.addColorStop(0.5, 'rgba(255, 255, 240, 0.2)');
             glowGrad.addColorStop(1, 'rgba(255, 255, 230, 0)');
             
             DOM.ctx.fillStyle = glowGrad;
-            DOM.ctx.fillRect(x - size * 4, y - size * 4, size * 8, size * 8);
+            DOM.ctx.fillRect(x - size * 5, y - size * 5, size * 10, size * 10);
             
             // Star core
-            DOM.ctx.fillStyle = 'rgba(255, 255, 250, 0.9)';
+            DOM.ctx.fillStyle = 'rgba(255, 255, 250, 0.95)';
             DOM.ctx.beginPath();
             DOM.ctx.arc(x, y, size, 0, Math.PI * 2);
             DOM.ctx.fill();
@@ -130,9 +130,9 @@ export const Night = {
         
         // Outer glow - very bright
         const outerGlow = DOM.ctx.createRadialGradient(moonX, moonY, 0, moonX, moonY, moonRadius * 6);
-        outerGlow.addColorStop(0, 'rgba(255, 250, 230, 0.5)');
-        outerGlow.addColorStop(0.3, 'rgba(255, 245, 220, 0.3)');
-        outerGlow.addColorStop(0.6, 'rgba(255, 240, 210, 0.15)');
+        outerGlow.addColorStop(0, 'rgba(255, 250, 230, 0.7)');
+        outerGlow.addColorStop(0.3, 'rgba(255, 245, 220, 0.4)');
+        outerGlow.addColorStop(0.6, 'rgba(255, 240, 210, 0.2)');
         outerGlow.addColorStop(1, 'rgba(255, 235, 200, 0)');
         
         DOM.ctx.fillStyle = outerGlow;
@@ -140,15 +140,15 @@ export const Night = {
         
         // Inner glow
         const innerGlow = DOM.ctx.createRadialGradient(moonX, moonY, 0, moonX, moonY, moonRadius * 3);
-        innerGlow.addColorStop(0, 'rgba(255, 252, 245, 0.7)');
-        innerGlow.addColorStop(0.5, 'rgba(255, 248, 235, 0.4)');
+        innerGlow.addColorStop(0, 'rgba(255, 252, 245, 0.85)');
+        innerGlow.addColorStop(0.5, 'rgba(255, 248, 235, 0.5)');
         innerGlow.addColorStop(1, 'rgba(255, 245, 225, 0)');
         
         DOM.ctx.fillStyle = innerGlow;
         DOM.ctx.fillRect(moonX - moonRadius * 3, moonY - moonRadius * 3, moonRadius * 6, moonRadius * 6);
         
         // Moon body - more natural cream/yellow color
-        DOM.ctx.fillStyle = 'rgba(255, 248, 230, 0.85)';
+        DOM.ctx.fillStyle = 'rgba(255, 252, 245, 0.95)';
         DOM.ctx.beginPath();
         DOM.ctx.arc(moonX, moonY, moonRadius, 0, Math.PI * 2);
         DOM.ctx.fill();
@@ -158,7 +158,7 @@ export const Night = {
             moonX - moonRadius * 0.3, moonY - moonRadius * 0.3, 0,
             moonX, moonY, moonRadius
         );
-        surfaceGlow.addColorStop(0, 'rgba(255, 252, 245, 0.3)');
+        surfaceGlow.addColorStop(0, 'rgba(255, 252, 245, 0.4)');
         surfaceGlow.addColorStop(1, 'rgba(255, 250, 240, 0)');
         
         DOM.ctx.fillStyle = surfaceGlow;
@@ -167,7 +167,7 @@ export const Night = {
         DOM.ctx.fill();
         
         // Subtle craters (more visible now)
-        DOM.ctx.fillStyle = 'rgba(230, 220, 200, 0.15)';
+        DOM.ctx.fillStyle = 'rgba(230, 220, 200, 0.2)';
         const craters = [
             { x: -10, y: -8, r: 6 },
             { x: 15, y: 10, r: 5 },
@@ -193,7 +193,7 @@ export const Night = {
             const height = 40 + Math.random() * 40;
             const width = 25 + Math.random() * 20;
             
-            DOM.ctx.fillStyle = '#0A0A12';
+            DOM.ctx.fillStyle = '#1A1A28';
             this.drawTreeSilhouette(x, horizonY, width, height);
         }
         
@@ -203,7 +203,7 @@ export const Night = {
             const height = 30 + Math.random() * 30;
             const width = 18 + Math.random() * 15;
             
-            DOM.ctx.fillStyle = '#08080E';
+            DOM.ctx.fillStyle = '#161622';
             this.drawTreeSilhouette(x, horizonY + Math.random() * 20, width, height);
         }
         
@@ -213,7 +213,7 @@ export const Night = {
             const height = 70 + Math.random() * 50;
             const width = 45 + Math.random() * 30;
             
-            DOM.ctx.fillStyle = '#0C0C14';
+            DOM.ctx.fillStyle = '#1E1E2C';
             this.drawTreeSilhouette(x, horizonY + 10, width, height);
         }
     },
@@ -247,26 +247,26 @@ export const Night = {
             moonX, DOM.canvas.height * 0.3, 0,
             moonX, DOM.canvas.height * 0.3, DOM.canvas.width * 1.5
         );
-        moonGlow.addColorStop(0, 'rgba(80, 80, 100, 0.6)');
-        moonGlow.addColorStop(0.25, 'rgba(60, 60, 80, 0.45)');
-        moonGlow.addColorStop(0.5, 'rgba(45, 45, 65, 0.3)');
-        moonGlow.addColorStop(0.75, 'rgba(30, 30, 50, 0.15)');
-        moonGlow.addColorStop(1, 'rgba(20, 20, 40, 0.05)');
+        moonGlow.addColorStop(0, 'rgba(100, 100, 120, 0.5)');
+        moonGlow.addColorStop(0.25, 'rgba(80, 80, 100, 0.35)');
+        moonGlow.addColorStop(0.5, 'rgba(60, 60, 80, 0.25)');
+        moonGlow.addColorStop(0.75, 'rgba(45, 45, 60, 0.12)');
+        moonGlow.addColorStop(1, 'rgba(30, 30, 45, 0.05)');
         
         DOM.ctx.fillStyle = moonGlow;
         DOM.ctx.fillRect(0, groundY, DOM.canvas.width, DOM.canvas.height - groundY);
         
         // Base ground gradient
         const groundGrad = DOM.ctx.createLinearGradient(0, groundY, 0, DOM.canvas.height);
-        groundGrad.addColorStop(0, '#181825');
-        groundGrad.addColorStop(0.3, '#101018');
-        groundGrad.addColorStop(1, '#0A0A10');
+        groundGrad.addColorStop(0, '#222235');
+        groundGrad.addColorStop(0.3, '#1A1A28');
+        groundGrad.addColorStop(1, '#141420');
         
         DOM.ctx.fillStyle = groundGrad;
         DOM.ctx.fillRect(0, groundY, DOM.canvas.width, DOM.canvas.height - groundY);
         
         // Subtle ground variation
-        DOM.ctx.fillStyle = '#151520';
+        DOM.ctx.fillStyle = '#1E1E30';
         DOM.ctx.beginPath();
         DOM.ctx.moveTo(0, groundY);
         
