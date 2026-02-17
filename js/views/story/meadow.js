@@ -122,7 +122,7 @@ export const Meadow = {
         for (let x = 0; x <= DOM.canvas.width + step; x += step) {
             const worldX = x + offset;
             const wrappedWorldX = this.wrapX(worldX, worldWidth);
-            const y = midHills + Math.sin(wrappedWorldX * baseFreq * 1.5 + 1) * 25 + Math.sin(wrappedWorldX * baseFreq * 3) * 12;
+            const y = midHills + Math.sin(wrappedWorldX * baseFreq * 1.5 + wrappedWorldX * baseFreq * 0.5) * 25 + Math.sin(wrappedWorldX * baseFreq * 3) * 12;
             DOM.ctx.lineTo(x, y);
         }
         
@@ -149,7 +149,7 @@ export const Meadow = {
         for (let x = 0; x <= DOM.canvas.width + step; x += step) {
             const worldX = x + offset;
             const wrappedWorldX = this.wrapX(worldX, worldWidth);
-            const y = nearHills + Math.sin(wrappedWorldX * baseFreq * 2 + 2) * 20 + Math.sin(wrappedWorldX * baseFreq * 4) * 10;
+            const y = nearHills + Math.sin(wrappedWorldX * baseFreq * 3) * 20 + Math.sin(wrappedWorldX * baseFreq * 4) * 10;
             DOM.ctx.lineTo(x, y);
         }
         
