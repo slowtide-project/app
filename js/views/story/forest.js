@@ -198,7 +198,7 @@ export const Forest = {
         
         for (let i = 0; i < this.farTrees.length; i++) {
             const tree = this.farTrees[i];
-            this.drawTreeSilhouette(tree.baseX, horizonY + tree.yOffset, tree.width, tree.height);
+            this.drawTreeSilhouette(tree.baseX, horizonY + tree.yOffset, tree.width, tree.height, '#3A4A35');
         }
     },
 
@@ -211,7 +211,7 @@ export const Forest = {
             const wrappedX = this.wrapX(tree.baseX - offset, worldWidth);
             
             if (wrappedX > -100 && wrappedX < DOM.canvas.width + 100) {
-                this.drawTreeSilhouette(wrappedX, horizonY + tree.yOffset, tree.width, tree.height);
+                this.drawTreeSilhouette(wrappedX, horizonY + tree.yOffset, tree.width, tree.height, '#3A4A35');
             }
         }
     },

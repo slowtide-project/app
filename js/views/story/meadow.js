@@ -90,13 +90,14 @@ export const Meadow = {
         DOM.ctx.beginPath();
         DOM.ctx.moveTo(0, farHills);
         
-        for (let x = 0; x <= DOM.canvas.width; x += 20) {
+        const step = 20;
+        for (let x = 0; x <= DOM.canvas.width + step; x += step) {
             const worldX = x + offset;
             const y = farHills + Math.sin(worldX * 0.008) * 30 + Math.sin(worldX * 0.015) * 15;
             DOM.ctx.lineTo(x, y);
         }
         
-        DOM.ctx.lineTo(DOM.canvas.width, DOM.canvas.height * 0.5);
+        DOM.ctx.lineTo(DOM.canvas.width + step, DOM.canvas.height * 0.5);
         DOM.ctx.lineTo(0, DOM.canvas.height * 0.5);
         DOM.ctx.closePath();
         DOM.ctx.fill();
@@ -113,14 +114,15 @@ export const Meadow = {
         DOM.ctx.beginPath();
         DOM.ctx.moveTo(0, midHills);
         
-        for (let x = 0; x <= DOM.canvas.width; x += 20) {
+        const step = 20;
+        for (let x = 0; x <= DOM.canvas.width + step; x += step) {
             const worldX = x + offset;
             const y = midHills + Math.sin(worldX * 0.01 + 1) * 25 + Math.sin(worldX * 0.02) * 12;
             DOM.ctx.lineTo(x, y);
         }
         
-        DOM.ctx.lineTo(DOM.canvas.width, DOM.canvas.height * 0.55);
-        DOM.ctx.lineTo(0, DOM.canvas.height * 0.55);
+        DOM.ctx.lineTo(DOM.canvas.width + step, DOM.canvas.height * 0.6);
+        DOM.ctx.lineTo(0, DOM.canvas.height * 0.6);
         DOM.ctx.closePath();
         DOM.ctx.fill();
     },
@@ -136,14 +138,15 @@ export const Meadow = {
         DOM.ctx.beginPath();
         DOM.ctx.moveTo(0, nearHills);
         
-        for (let x = 0; x <= DOM.canvas.width; x += 20) {
+        const step = 20;
+        for (let x = 0; x <= DOM.canvas.width + step; x += step) {
             const worldX = x + offset;
             const y = nearHills + Math.sin(worldX * 0.012 + 2) * 20 + Math.sin(worldX * 0.025) * 10;
             DOM.ctx.lineTo(x, y);
         }
         
-        DOM.ctx.lineTo(DOM.canvas.width, DOM.canvas.height * 0.6);
-        DOM.ctx.lineTo(0, DOM.canvas.height * 0.6);
+        DOM.ctx.lineTo(DOM.canvas.width + step, DOM.canvas.height);
+        DOM.ctx.lineTo(0, DOM.canvas.height);
         DOM.ctx.closePath();
         DOM.ctx.fill();
     },
