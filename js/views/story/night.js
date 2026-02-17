@@ -1,13 +1,57 @@
 // =========================================================================
-// Night Sky view - Simple calming night scene for story mode
+// Night Sky view - Calming night scene for story mode with walking
 // =========================================================================
 
 import { AppState, DOM } from '../../state.js';
-import { CONFIG } from '../../config.js';
+import { CONFIG, SCROLL_SETTINGS } from '../../config.js';
+import { BaseScene, seededRandom } from './base-scene.js';
 
 export const Night = {
-    init() {
-        this.drawNight();
+    ...BaseScene,
+    
+    stars: [],
+    farTrees: [],
+    nearTrees: [],
+
+    generateElements() {
+        const worldWidth = DOM.canvas.width * 3;
+        
+        // Stars - static positions across the sky
+        this.stars = [];
+        for (let i = 0; i < 145; i++) {
+            const seed = i * 100 + 1;
+            this.stars.push({
+                x: seededRandom(seed) * DOM.canvas.width,
+                y: seededRandom(seed + 1) * DOM.canvas.height * 0.6,
+                size: 0.5 + seededRandom(seed + 2) * 1.5,
+                brightness: 0.5 + seededRandom(seed + 3) * 0.5,
+                isBright: seededRandom(seed + 4) > 0.8
+            });
+        }
+        
+        // Far trees - horizon silhouettes
+        this.farTrees = [];
+        for (let i = 0; i < 50; i++) {
+            const seed = i * 100 + 1000;
+            this.farTrees.push({
+                baseX: (i / 50) * worldWidth * 1.1,
+                height: 40 + seededRandom(seed + 1) * 40,
+                width: 25 + seededRandom(seed + 2) * 20,
+                shade: seededRandom(seed + 3) > 0.5 ? '#1A1A28' : '#161622'
+            });
+        }
+        
+        // Near trees - closer silhouettes
+        this.nearTrees = [];
+        for (let i = 0; i < 30; i++) {
+            const seed = i * 100 + 2000;
+            this.nearTrees.push({
+                baseX: (i / 30) * worldWidth * 1.08,
+                height: 70 + seededRandom(seed + 1) * 50,
+                width: 45 + seededRandom(seed + 2) * 30,
+                yOffset: seededRandom(seed + 3) * 20
+            });
+        }
     },
     
     handleStart(x, y) {
@@ -21,114 +65,63 @@ export const Night = {
     update() {
         // Static scene - no updates needed
     },
-    
-    redraw() {
-        this.drawNight();
-    },
-    
-    drawNight() {
+
+    drawSceneWithOffset(scrollOffset) {
         DOM.ctx.clearRect(0, 0, DOM.canvas.width, DOM.canvas.height);
+        
+        const p = SCROLL_SETTINGS.PARALLAX_FACTORS;
         
         this.drawSky();
         this.drawStars();
         this.drawMoon();
-        this.drawHorizon();
-        this.drawGround();
+        this.drawTreesWithOffset(scrollOffset * 0.5);
+        this.drawGroundWithOffset(scrollOffset * p.GROUND);
     },
     
     drawSky() {
-        // Dark night sky with super moon glow
         const gradient = DOM.ctx.createLinearGradient(0, 0, 0, DOM.canvas.height * 0.7);
-        gradient.addColorStop(0, '#1E1E38');    // Lighter from moon glow
-        gradient.addColorStop(0.3, '#16162C');  // Dark blue
-        gradient.addColorStop(0.6, '#1A1A30');  // Dark purple-blue
-        gradient.addColorStop(1, '#222240');     // Lighter at horizon from moon
+        gradient.addColorStop(0, '#1E1E38');
+        gradient.addColorStop(0.3, '#16162C');
+        gradient.addColorStop(0.6, '#1A1A30');
+        gradient.addColorStop(1, '#222240');
         
         DOM.ctx.fillStyle = gradient;
-        DOM.ctx.fillRect(0, 0, DOM.canvas.width, DOM.canvas.height);
-        
-        // Super moon glow in sky - very bright
-        const moonX = DOM.canvas.width * 0.78;
-        const moonY = DOM.canvas.height * 0.18;
-        
-        // Large outer glow
-        const outerGlow = DOM.ctx.createRadialGradient(moonX, moonY, 0, moonX, moonY, 400);
-        outerGlow.addColorStop(0, 'rgba(255, 250, 220, 0.5)');
-        outerGlow.addColorStop(0.2, 'rgba(255, 245, 210, 0.35)');
-        outerGlow.addColorStop(0.5, 'rgba(255, 240, 200, 0.15)');
-        outerGlow.addColorStop(1, 'rgba(255, 235, 190, 0)');
-        
-        DOM.ctx.fillStyle = outerGlow;
-        DOM.ctx.fillRect(0, 0, DOM.canvas.width, DOM.canvas.height);
-        
-        // Medium glow
-        const mediumGlow = DOM.ctx.createRadialGradient(moonX, moonY, 0, moonX, moonY, 200);
-        mediumGlow.addColorStop(0, 'rgba(255, 252, 240, 0.75)');
-        mediumGlow.addColorStop(0.5, 'rgba(255, 248, 230, 0.4)');
-        mediumGlow.addColorStop(1, 'rgba(255, 245, 220, 0)');
-        
-        DOM.ctx.fillStyle = mediumGlow;
-        DOM.ctx.fillRect(0, 0, DOM.canvas.width, DOM.canvas.height);
-        
-        // Subtle horizon glow from moon
-        const horizonGlow = DOM.ctx.createRadialGradient(
-            DOM.canvas.width * 0.5, DOM.canvas.height, 0,
-            DOM.canvas.width * 0.5, DOM.canvas.height, DOM.canvas.width * 0.8
-        );
-        horizonGlow.addColorStop(0, 'rgba(60, 60, 80, 0.25)');
-        horizonGlow.addColorStop(0.5, 'rgba(45, 45, 65, 0.12)');
-        horizonGlow.addColorStop(1, 'rgba(30, 30, 50, 0)');
-        
-        DOM.ctx.fillStyle = horizonGlow;
         DOM.ctx.fillRect(0, 0, DOM.canvas.width, DOM.canvas.height);
     },
     
     drawStars() {
-        // Static stars - scattered across sky
-        for (let i = 0; i < 120; i++) {
-            const x = Math.random() * DOM.canvas.width;
-            const y = Math.random() * DOM.canvas.height * 0.6;
-            const size = 0.5 + Math.random() * 1.5;
-            
-            // Varying brightness
-            const brightness = 0.5 + Math.random() * 0.5;
-            
-            DOM.ctx.fillStyle = `rgba(255, 255, 240, ${brightness})`;
+        for (const star of this.stars) {
+            DOM.ctx.fillStyle = `rgba(255, 255, 240, ${star.brightness})`;
             DOM.ctx.beginPath();
-            DOM.ctx.arc(x, y, size, 0, Math.PI * 2);
+            DOM.ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
             DOM.ctx.fill();
         }
         
-        // A few brighter stars
-        for (let i = 0; i < 25; i++) {
-            const x = Math.random() * DOM.canvas.width;
-            const y = Math.random() * DOM.canvas.height * 0.5;
-            const size = 1.5 + Math.random() * 1;
-            
-            // Star glow
-            const glowGrad = DOM.ctx.createRadialGradient(x, y, 0, x, y, size * 5);
-            glowGrad.addColorStop(0, 'rgba(255, 255, 250, 0.6)');
-            glowGrad.addColorStop(0.5, 'rgba(255, 255, 240, 0.2)');
-            glowGrad.addColorStop(1, 'rgba(255, 255, 230, 0)');
-            
-            DOM.ctx.fillStyle = glowGrad;
-            DOM.ctx.fillRect(x - size * 5, y - size * 5, size * 10, size * 10);
-            
-            // Star core
-            DOM.ctx.fillStyle = 'rgba(255, 255, 250, 0.95)';
-            DOM.ctx.beginPath();
-            DOM.ctx.arc(x, y, size, 0, Math.PI * 2);
-            DOM.ctx.fill();
+        // Bright stars with glow
+        for (const star of this.stars) {
+            if (star.isBright) {
+                const glowGrad = DOM.ctx.createRadialGradient(star.x, star.y, 0, star.x, star.y, star.size * 5);
+                glowGrad.addColorStop(0, 'rgba(255, 255, 250, 0.6)');
+                glowGrad.addColorStop(0.5, 'rgba(255, 255, 240, 0.2)');
+                glowGrad.addColorStop(1, 'rgba(255, 255, 230, 0)');
+                
+                DOM.ctx.fillStyle = glowGrad;
+                DOM.ctx.fillRect(star.x - star.size * 5, star.y - star.size * 5, star.size * 10, star.size * 10);
+                
+                DOM.ctx.fillStyle = 'rgba(255, 255, 250, 0.95)';
+                DOM.ctx.beginPath();
+                DOM.ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                DOM.ctx.fill();
+            }
         }
     },
     
     drawMoon() {
-        // Super moon - much bigger and brighter
         const moonX = DOM.canvas.width * 0.78;
         const moonY = DOM.canvas.height * 0.18;
-        const moonRadius = 50; // Much bigger than before (was 25)
+        const moonRadius = 50;
         
-        // Outer glow - very bright
+        // Outer glow
         const outerGlow = DOM.ctx.createRadialGradient(moonX, moonY, 0, moonX, moonY, moonRadius * 6);
         outerGlow.addColorStop(0, 'rgba(255, 250, 230, 0.7)');
         outerGlow.addColorStop(0.3, 'rgba(255, 245, 220, 0.4)');
@@ -147,13 +140,13 @@ export const Night = {
         DOM.ctx.fillStyle = innerGlow;
         DOM.ctx.fillRect(moonX - moonRadius * 3, moonY - moonRadius * 3, moonRadius * 6, moonRadius * 6);
         
-        // Moon body - more natural cream/yellow color
+        // Moon body
         DOM.ctx.fillStyle = 'rgba(255, 252, 245, 0.95)';
         DOM.ctx.beginPath();
         DOM.ctx.arc(moonX, moonY, moonRadius, 0, Math.PI * 2);
         DOM.ctx.fill();
         
-        // Subtle surface glow
+        // Surface glow
         const surfaceGlow = DOM.ctx.createRadialGradient(
             moonX - moonRadius * 0.3, moonY - moonRadius * 0.3, 0,
             moonX, moonY, moonRadius
@@ -166,7 +159,7 @@ export const Night = {
         DOM.ctx.arc(moonX, moonY, moonRadius, 0, Math.PI * 2);
         DOM.ctx.fill();
         
-        // Subtle craters (more visible now)
+        // Craters
         DOM.ctx.fillStyle = 'rgba(230, 220, 200, 0.2)';
         const craters = [
             { x: -10, y: -8, r: 6 },
@@ -183,43 +176,32 @@ export const Night = {
         });
     },
     
-    drawHorizon() {
-        // Dark tree silhouettes at horizon
+    drawTreesWithOffset(offset) {
         const horizonY = DOM.canvas.height * 0.55;
+        const worldWidth = DOM.canvas.width * 3;
         
-        // Far trees - very dark
-        for (let i = 0; i < 50; i++) {
-            const x = (i / 50) * DOM.canvas.width * 1.1 - DOM.canvas.width * 0.05;
-            const height = 40 + Math.random() * 40;
-            const width = 25 + Math.random() * 20;
+        // Far trees
+        for (const tree of this.farTrees) {
+            const wrappedX = this.wrapX(tree.baseX - offset, worldWidth);
             
-            DOM.ctx.fillStyle = '#1A1A28';
-            this.drawTreeSilhouette(x, horizonY, width, height);
+            if (wrappedX > -100 && wrappedX < DOM.canvas.width + 100) {
+                DOM.ctx.fillStyle = tree.shade;
+                this.drawTreeSilhouette(wrappedX, horizonY, tree.width, tree.height);
+            }
         }
         
-        // Fill gaps
-        for (let i = 0; i < 20; i++) {
-            const x = Math.random() * DOM.canvas.width;
-            const height = 30 + Math.random() * 30;
-            const width = 18 + Math.random() * 15;
+        // Near trees
+        for (const tree of this.nearTrees) {
+            const wrappedX = this.wrapX(tree.baseX - offset, worldWidth);
             
-            DOM.ctx.fillStyle = '#161622';
-            this.drawTreeSilhouette(x, horizonY + Math.random() * 20, width, height);
-        }
-        
-        // Closer trees - slightly lighter dark
-        for (let i = 0; i < 30; i++) {
-            const x = (i / 30) * DOM.canvas.width * 1.08 - DOM.canvas.width * 0.04;
-            const height = 70 + Math.random() * 50;
-            const width = 45 + Math.random() * 30;
-            
-            DOM.ctx.fillStyle = '#1E1E2C';
-            this.drawTreeSilhouette(x, horizonY + 10, width, height);
+            if (wrappedX > -150 && wrappedX < DOM.canvas.width + 150) {
+                DOM.ctx.fillStyle = '#1E1E2C';
+                this.drawTreeSilhouette(wrappedX, horizonY + tree.yOffset, tree.width, tree.height);
+            }
         }
     },
     
     drawTreeSilhouette(x, baseY, width, height) {
-        // Simple triangular pine silhouette
         const layers = 4;
         
         for (let i = 0; i < layers; i++) {
@@ -236,11 +218,11 @@ export const Night = {
         }
     },
     
-    drawGround() {
-        // Very dark ground - starts where trees end
+    drawGroundWithOffset(offset) {
         const groundY = DOM.canvas.height * 0.55;
+        const worldWidth = DOM.canvas.width * 3;
         
-        // Super moon glow on ground - much brighter
+        // Moon glow on ground
         const moonX = DOM.canvas.width * 0.78;
         
         const moonGlow = DOM.ctx.createRadialGradient(
@@ -265,13 +247,14 @@ export const Night = {
         DOM.ctx.fillStyle = groundGrad;
         DOM.ctx.fillRect(0, groundY, DOM.canvas.width, DOM.canvas.height - groundY);
         
-        // Subtle ground variation
+        // Ground variation with sine wave
         DOM.ctx.fillStyle = '#1E1E30';
         DOM.ctx.beginPath();
         DOM.ctx.moveTo(0, groundY);
         
         for (let x = 0; x <= DOM.canvas.width; x += 40) {
-            const y = groundY + Math.sin(x * 0.01) * 5;
+            const worldX = x + offset;
+            const y = groundY + Math.sin(this.wrapX(worldX, worldWidth) * 0.01) * 5;
             DOM.ctx.lineTo(x, y);
         }
         

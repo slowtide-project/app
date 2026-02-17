@@ -3,7 +3,7 @@
 // =========================================================================
 
 import { AppState, DOM } from '../state.js';
-import { CONFIG, VIEWS, STORY_SCENES } from '../config.js';
+import { CONFIG, VIEWS, STORY_SCENES, SCROLL_SETTINGS } from '../config.js';
 import { trackSessionStart, trackVirtualPageView, generateSessionIdentifier } from '../analytics.js';
 import { Forest } from '../views/story/forest.js';
 import { Beach } from '../views/story/beach.js';
@@ -46,12 +46,185 @@ const SCENE_TITLES = {
 // Story Mode Controller
 export const StoryMode = {
     isActive: false,
+    scrollAnimationFrame: null,
+    walkAnimationFrame: null,
+    touchAccumulatedDistance: 0,
 
     /**
      * Handle input - story scenes are static, no interaction
      */
     handleInput(e, type) {
         // No interaction in story mode - scenes are static
+    },
+
+    /**
+     * Initialize scroll handling
+     */
+    initScroll() {
+        this.setupTouchHandlers();
+        this.setupKeyboardHandlers();
+        this.setupWheelHandler();
+    },
+
+    /**
+     * Setup touch handlers for mobile/tablet
+     */
+    setupTouchHandlers() {
+        const canvas = DOM.canvas;
+        
+        canvas.addEventListener('touchstart', (e) => {
+            if (!this.isActive) return;
+            e.preventDefault();
+            const touch = e.touches[0];
+            AppState.scrollState.isDragging = true;
+            AppState.scrollState.dragStartX = touch.clientX;
+            this.touchAccumulatedDistance = 0;
+        }, { passive: false });
+
+        canvas.addEventListener('touchmove', (e) => {
+            if (!this.isActive || !AppState.scrollState.isDragging) return;
+            e.preventDefault();
+            const touch = e.touches[0];
+            const deltaX = touch.clientX - AppState.scrollState.dragStartX;
+            AppState.scrollState.dragStartX = touch.clientX;
+            
+            this.touchAccumulatedDistance += deltaX;
+            
+            const step = SCROLL_SETTINGS.TOUCH_STEP;
+            while (Math.abs(this.touchAccumulatedDistance) >= step) {
+                if (this.touchAccumulatedDistance > 0) {
+                    this.walk(step);
+                    this.touchAccumulatedDistance -= step;
+                } else {
+                    this.walk(-step);
+                    this.touchAccumulatedDistance += step;
+                }
+            }
+        }, { passive: false });
+
+        canvas.addEventListener('touchend', (e) => {
+            if (!this.isActive) return;
+            AppState.scrollState.isDragging = false;
+            this.touchAccumulatedDistance = 0;
+        });
+    },
+
+    /**
+     * Setup keyboard handlers for laptop
+     */
+    setupKeyboardHandlers() {
+        document.addEventListener('keydown', (e) => {
+            if (!this.isActive) return;
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                this.walk(-SCROLL_SETTINGS.ARROW_STEP);
+            } else if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                this.walk(SCROLL_SETTINGS.ARROW_STEP);
+            }
+        });
+    },
+
+    /**
+     * Setup mouse wheel handler
+     */
+    setupWheelHandler() {
+        DOM.canvas.addEventListener('wheel', (e) => {
+            if (!this.isActive) return;
+            e.preventDefault();
+            const delta = e.deltaY * 0.5;
+            this.walk(delta);
+        }, { passive: false });
+    },
+
+    /**
+     * Walk through the scene - positive = walk forward (scene moves left)
+     */
+    walk(distance) {
+        AppState.scrollState.walkTarget += distance;
+        
+        // Schedule animation for next frame to avoid visual flash
+        if (!this.walkAnimationFrame) {
+            this.walkAnimationFrame = requestAnimationFrame(() => this.smoothWalkTick());
+        }
+    },
+
+    /**
+     * Smooth walk animation tick
+     */
+    smoothWalkTick() {
+        const smoothing = SCROLL_SETTINGS.WALK_SMOOTHING;
+        const diff = AppState.scrollState.walkTarget - AppState.scrollState.offset;
+        
+        if (Math.abs(diff) > 0.1) {
+            AppState.scrollState.offset += diff * smoothing;
+            this.renderWithScroll();
+            this.walkAnimationFrame = requestAnimationFrame(() => this.smoothWalkTick());
+        } else {
+            AppState.scrollState.offset = AppState.scrollState.walkTarget;
+            this.renderWithScroll();
+            this.walkAnimationFrame = null;
+        }
+    },
+
+    /**
+     * Start momentum scroll animation
+     */
+    startMomentumScroll() {
+        if (this.scrollAnimationFrame) {
+            cancelAnimationFrame(this.scrollAnimationFrame);
+        }
+        this.momentumTick();
+    },
+
+    /**
+     * Momentum scroll tick
+     */
+    momentumTick() {
+        if (!AppState.scrollState.isDragging && Math.abs(AppState.scrollState.velocity) > SCROLL_SETTINGS.MIN_VELOCITY) {
+            AppState.scrollState.velocity *= SCROLL_SETTINGS.FRICTION;
+            AppState.scrollState.offset += AppState.scrollState.velocity;
+            this.renderWithScroll();
+            this.scrollAnimationFrame = requestAnimationFrame(() => this.momentumTick());
+        }
+    },
+
+    /**
+     * Render scene with current scroll offset
+     */
+    renderWithScroll() {
+        switch (AppState.currentView) {
+            case STORY_SCENES.FOREST:
+                Forest.renderWithScroll(AppState.scrollState.offset);
+                break;
+            case STORY_SCENES.BEACH:
+                Beach.renderWithScroll(AppState.scrollState.offset);
+                break;
+            case STORY_SCENES.MEADOW:
+                Meadow.renderWithScroll(AppState.scrollState.offset);
+                break;
+            case STORY_SCENES.NIGHT:
+                Night.renderWithScroll(AppState.scrollState.offset);
+                break;
+            case STORY_SCENES.LAKE:
+                Lake.renderWithScroll(AppState.scrollState.offset);
+                break;
+        }
+    },
+
+    /**
+     * Reset scroll state
+     */
+    resetScroll() {
+        AppState.scrollState.offset = 0;
+        AppState.scrollState.walkTarget = 0;
+        AppState.scrollState.velocity = 0;
+        AppState.scrollState.isDragging = false;
+        
+        if (this.walkAnimationFrame) {
+            cancelAnimationFrame(this.walkAnimationFrame);
+            this.walkAnimationFrame = null;
+        }
     },
 
     /**
@@ -67,6 +240,9 @@ export const StoryMode = {
         
         AppState.currentView = sceneName;
         AppState.entities = [];
+        
+        // Reset scroll offset when switching scenes
+        this.resetScroll();
         
         // Update nav button active state
         document.querySelectorAll('#nav-bar-story .nav-btn').forEach(el => el.classList.remove('active'));
@@ -118,6 +294,10 @@ export const StoryMode = {
         this.isActive = true;
         StoryState.isActive = true;
         
+        // Initialize scroll handling
+        this.initScroll();
+        this.resetScroll();
+        
         // Hide story start screen
         DOM.startScreenStory.style.display = 'none';
         
@@ -160,6 +340,18 @@ export const StoryMode = {
         StoryState.isActive = false;
         AppState.isSessionRunning = false;
         AppState.entities = [];
+        
+        // Stop scroll animation
+        if (this.scrollAnimationFrame) {
+            cancelAnimationFrame(this.scrollAnimationFrame);
+            this.scrollAnimationFrame = null;
+        }
+        
+        // Stop walk animation
+        if (this.walkAnimationFrame) {
+            cancelAnimationFrame(this.walkAnimationFrame);
+            this.walkAnimationFrame = null;
+        }
         
         // Clear canvas
         DOM.ctx.clearRect(0, 0, DOM.canvas.width, DOM.canvas.height);

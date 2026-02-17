@@ -72,6 +72,150 @@ export const NewScene = {
 
 ---
 
+## 🎭 Adding Walking/Parallax to Story Scenes
+
+**When to use**: Adding walking/scrolling parallax features to a story scene (like forest or beach)
+
+**Agent**: General Purpose
+**Files to modify**:
+- Update `js/views/story/[scene].js` - add scrolling methods
+- Update `js/modes/story.js` - add scene to `renderWithScroll()` switch
+
+### Required Imports
+
+```javascript
+import { AppState, DOM } from '../../state.js';
+import { CONFIG, SCROLL_SETTINGS } from '../../config.js';
+import { BaseScene, seededRandom } from './base-scene.js';
+```
+
+### Required Methods
+
+See "Using Base Scene (Recommended)" section below for the easiest implementation.
+
+### CRITICAL Rules
+
+1. **Direction**: Always use `baseX - offset` for objects (NOT `+ offset`)
+   - This makes objects move LEFT when pressing right arrow
+   - Ground uses `x + offset` because sine waves shift differently
+
+2. **Random**: ALWAYS use seeded random, NEVER `Math.random()`
+   - `seededRandom` is imported from base-scene.js
+
+3. **Ground/Terrain**: Use sine waves only (no random noise)
+   - Sine waves are naturally periodic → seamless world wrap
+   - If you need variation, blend multiple sine waves
+
+4. **World Width**: Use `DOM.canvas.width * 3` for scrolling world
+
+5. **Parallax**: Different elements can use different parallax factors from `SCROLL_SETTINGS.PARALLAX_FACTORS`
+
+6. **Scene Switching**: `story.js` already calls `resetScroll()` in `switchScene()` - no additional code needed
+
+### Using Base Scene (Recommended)
+
+For all story scenes, use the shared base module:
+
+```javascript
+import { BaseScene, seededRandom } from './base-scene.js';
+
+export const MyScene = {
+    ...BaseScene,
+    
+    // Scene-specific properties
+    elements: [],
+
+    generateElements() {
+        const worldWidth = DOM.canvas.width * 3;
+        
+        this.elements = [];
+        for (let i = 0; i < 50; i++) {
+            const seed = i * 100 + 1;
+            this.elements.push({
+                baseX: seededRandom(seed) * worldWidth,
+                baseY: seededRandom(seed + 1) * 100,
+                size: 10 + seededRandom(seed + 2) * 20
+            });
+        }
+    },
+    
+    drawSceneWithOffset(scrollOffset) {
+        DOM.ctx.clearRect(0, 0, DOM.canvas.width, DOM.canvas.height);
+        
+        const p = SCROLL_SETTINGS.PARALLAX_FACTORS;
+        
+        this.drawSky();
+        this.drawGroundWithOffset(scrollOffset * p.GROUND);
+        this.drawObjectsWithOffset(scrollOffset * p.GROUND);
+    },
+    
+    drawSky() { ... },
+    drawGround() { ... },
+    drawGroundWithOffset(offset) {
+        const groundY = DOM.canvas.height * 0.55;
+        const worldWidth = DOM.canvas.width * 3;
+        
+        // Draw ground
+        // ...
+        
+        // Sine wave terrain - add offset to x coordinate
+        for (let x = 0; x <= DOM.canvas.width; x += 20) {
+            const worldX = x + offset;
+            const y = groundY + Math.sin(worldX * 0.01) * 5;
+            DOM.ctx.lineTo(x, y);
+        }
+    },
+    drawObjects() { ... },
+    drawObjectsWithOffset(offset) {
+        const worldWidth = DOM.canvas.width * 3;
+        
+        for (const el of this.elements) {
+            // CRITICAL: Use baseX - offset (NOT + offset)
+            const wrappedX = this.wrapX(el.baseX - offset, worldWidth);
+            
+            // Only draw if visible
+            if (wrappedX > -50 && wrappedX < DOM.canvas.width + 50) {
+                this.drawObject(wrappedX, el.baseY, el.size);
+            }
+        }
+    },
+    drawObject(x, y, size) { ... }
+};
+```
+
+Benefits:
+- No duplicate `init()`, `redraw()`, `renderWithScroll()`, or `wrapX()` code
+- Forces use of offset version (prevents jump bugs)
+- Provides `seededRandom()` function automatically
+
+### Updating story.js
+
+Add your scene to the `renderWithScroll()` switch:
+
+```javascript
+renderWithScroll() {
+    switch (AppState.currentView) {
+        case STORY_SCENES.FOREST:
+            Forest.renderWithScroll(AppState.scrollState.offset);
+            break;
+        case STORY_SCENES.BEACH:
+            Beach.renderWithScroll(AppState.scrollState.offset);
+            break;
+        case STORY_SCENES.MEADOW:
+            Meadow.renderWithScroll(AppState.scrollState.offset);
+            break;
+        case STORY_SCENES.NIGHT:
+            Night.renderWithScroll(AppState.scrollState.offset);
+            break;
+        case STORY_SCENES.LAKE:
+            Lake.renderWithScroll(AppState.scrollState.offset);
+            break;
+    }
+},
+```
+
+---
+
 ## ⚙️ Mode Manager Architecture
 
 **When to use**: Understanding or modifying how modes are routed

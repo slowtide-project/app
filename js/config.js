@@ -115,6 +115,21 @@ export const VISUAL_DENSITY = {
     RICH: 'rich'
 };
 
+export const SCROLL_SETTINGS = {
+    SENSITIVITY: 0.002,
+    FRICTION: 0.95,
+    ARROW_STEP: 3,
+    TOUCH_STEP: 3,
+    WALK_SPEED: 3,
+    WALK_SMOOTHING: 0.15,
+    PARALLAX_FACTORS: {
+        SKY: 0.1,
+        FAR_TREES: 1.0,
+        MID_TREES: 1.0,
+        GROUND: 1.0
+    }
+};
+
 export const EMERGENT_EVENTS = {
     OFF: 'off',
     RARE: 'rare',

@@ -24,6 +24,15 @@ export const AppState = {
         currentQuestion: null,
         correctAnswer: null,
         isActive: false
+    },
+    // Scroll state for story mode
+    scrollState: {
+        offset: 0,
+        walkTarget: 0,
+        velocity: 0,
+        isDragging: false,
+        dragStartX: 0,
+        dragStartOffset: 0
     }
 };
 
