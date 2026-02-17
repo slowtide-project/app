@@ -93,7 +93,8 @@ export const Meadow = {
         const step = 20;
         for (let x = 0; x <= DOM.canvas.width + step; x += step) {
             const worldX = x + offset;
-            const y = farHills + Math.sin(worldX * 0.008) * 30 + Math.sin(worldX * 0.015) * 15;
+            const wrappedWorldX = this.wrapX(worldX, worldWidth);
+            const y = farHills + Math.sin(wrappedWorldX * 0.008) * 30 + Math.sin(wrappedWorldX * 0.015) * 15;
             DOM.ctx.lineTo(x, y);
         }
         
@@ -104,6 +105,7 @@ export const Meadow = {
     },
     
     drawMidHillsWithOffset(offset) {
+        const worldWidth = DOM.canvas.width * 3;
         const midHills = DOM.canvas.height * 0.42;
         
         const hillGrad2 = DOM.ctx.createLinearGradient(0, midHills - 40, 0, midHills + 40);
@@ -117,7 +119,8 @@ export const Meadow = {
         const step = 20;
         for (let x = 0; x <= DOM.canvas.width + step; x += step) {
             const worldX = x + offset;
-            const y = midHills + Math.sin(worldX * 0.01 + 1) * 25 + Math.sin(worldX * 0.02) * 12;
+            const wrappedWorldX = this.wrapX(worldX, worldWidth);
+            const y = midHills + Math.sin(wrappedWorldX * 0.01 + 1) * 25 + Math.sin(wrappedWorldX * 0.02) * 12;
             DOM.ctx.lineTo(x, y);
         }
         
@@ -128,6 +131,7 @@ export const Meadow = {
     },
     
     drawNearHillsWithOffset(offset) {
+        const worldWidth = DOM.canvas.width * 3;
         const nearHills = DOM.canvas.height * 0.5;
         
         const hillGrad3 = DOM.ctx.createLinearGradient(0, nearHills - 30, 0, nearHills + 30);
@@ -141,7 +145,8 @@ export const Meadow = {
         const step = 20;
         for (let x = 0; x <= DOM.canvas.width + step; x += step) {
             const worldX = x + offset;
-            const y = nearHills + Math.sin(worldX * 0.012 + 2) * 20 + Math.sin(worldX * 0.025) * 10;
+            const wrappedWorldX = this.wrapX(worldX, worldWidth);
+            const y = nearHills + Math.sin(wrappedWorldX * 0.012 + 2) * 20 + Math.sin(wrappedWorldX * 0.025) * 10;
             DOM.ctx.lineTo(x, y);
         }
         
