@@ -2,7 +2,7 @@
 // Main application logic - delegates to mode files
 // =========================================================================
 
-import { CONFIG, SOUND_TYPES, VIEWS } from './config.js';
+import { CONFIG, SOUND_TYPES, VIEWS, APP_VERSION } from './config.js';
 import { AppState, AudioState, DOM, initDOM } from './state.js';
 import { AudioEngine, ContinuousSynth } from './audio.js';
 import { savePreferences, loadPreferences } from './storage.js';
@@ -248,6 +248,10 @@ function initApp() {
         console.log('Running initDOM...');
         initDOM();
         console.log('initDOM complete');
+        
+        // Set version indicators
+        document.getElementById('start-screen-version').textContent = APP_VERSION;
+        
         console.log('Running initParentMenu...');
         initParentMenu();
         console.log('initParentMenu complete');

@@ -638,4 +638,44 @@ update() {
 
 ---
 
+## 🔢 Version Management
+
+**When to use**: Any code changes - version must be updated to verify deployments
+
+**Agent**: General Purpose
+**Files to modify**:
+- `js/config.js` - Update `APP_VERSION` constant
+
+**Version format**: Follow [Semantic Versioning 2.0.0](https://semver.org/)
+- Format: `MAJOR.MINOR.PATCH` (e.g., `1.2.3`)
+- No leading zeros (e.g., `01.0.0` is invalid)
+
+**When to increment**:
+| Change Type | Increment |
+|-------------|-----------|
+| Backward compatible bug fixes | PATCH (1.0.0 → 1.0.1) |
+| New backward compatible features | MINOR (1.0.0 → 1.1.0) |
+| Backward incompatible API changes | MAJOR (1.0.0 → 2.0.0) |
+
+**Implementation**:
+```javascript
+// js/config.js
+export const APP_VERSION = '1.0.0';
+```
+
+**Version display**:
+- Shown in Admin overlay → Debug Info section
+- Visible on app start screen (subtle corner indicator)
+
+**IMPORTANT: Update version on EVERY code change**
+- Minimum: increment patch number
+- This ensures cache verification works - if version hasn't changed, the deployment didn't succeed
+
+**Why this matters:**
+- Version indicator on start screen lets you verify new deployments immediately
+- Follows industry standard (SemVer) for clarity
+- Prevents confusion when testing - if you don't see the new version, cache needs clearing
+
+---
+
 This file should be updated as new patterns emerge or the codebase evolves. All development should follow these established patterns for consistency and maintainability.

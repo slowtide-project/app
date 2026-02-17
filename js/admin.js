@@ -3,7 +3,7 @@
 // =========================================================================
 
 import { AppState, AudioState, DOM } from './state.js';
-import { VIEWS, STORY_SCENES } from './config.js';
+import { VIEWS, STORY_SCENES, APP_VERSION } from './config.js';
 import { StoryMode } from './modes/story.js';
 import { getCurrentMode } from './systems.js';
 
@@ -51,6 +51,7 @@ export function toggleAdminOverlay() {
  * Update admin debug info display
  */
 function updateAdminDebugInfo() {
+    document.getElementById('admin-version').textContent = APP_VERSION;
     document.getElementById('admin-session-status').textContent = AppState.isSessionRunning ? 'Yes' : 'No';
     document.getElementById('admin-current-mode').textContent = getCurrentMode() || 'None';
     document.getElementById('admin-current-view').textContent = AppState.currentView || '-';

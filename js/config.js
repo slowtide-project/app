@@ -2,6 +2,9 @@
 // Configuration & constants
 // =========================================================================
 
+/** Application version following Semantic Versioning (SemVer) */
+export const APP_VERSION = '1.0.0';
+
 /** Application configuration and constants */
 export const CONFIG = {
     DEFAULT_SESSION_MINUTES: 90,

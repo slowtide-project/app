@@ -675,6 +675,11 @@ canvas {
     color: #4a90e2;
 }
 
+#admin-version {
+    color: #4ade80;
+    font-weight: bold;
+}
+
 .admin-actions {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -750,6 +755,15 @@ canvas {
     font-size: 24px;
     letter-spacing: 3px;
     margin-bottom: 20px;
+}
+
+.version-indicator {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    font-size: 12px;
+    color: #555;
+    font-family: 'Courier New', monospace;
 }
 
 .session-id {
