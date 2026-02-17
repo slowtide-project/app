@@ -98,8 +98,8 @@ export const Meadow = {
             DOM.ctx.lineTo(x, y);
         }
         
-        DOM.ctx.lineTo(DOM.canvas.width + step, DOM.canvas.height * 0.5);
-        DOM.ctx.lineTo(0, DOM.canvas.height * 0.5);
+        DOM.ctx.lineTo(DOM.canvas.width + step, DOM.canvas.height * 0.65);
+        DOM.ctx.lineTo(0, DOM.canvas.height * 0.65);
         DOM.ctx.closePath();
         DOM.ctx.fill();
     },
@@ -124,8 +124,8 @@ export const Meadow = {
             DOM.ctx.lineTo(x, y);
         }
         
-        DOM.ctx.lineTo(DOM.canvas.width + step, DOM.canvas.height * 0.6);
-        DOM.ctx.lineTo(0, DOM.canvas.height * 0.6);
+        DOM.ctx.lineTo(DOM.canvas.width + step, DOM.canvas.height * 0.75);
+        DOM.ctx.lineTo(0, DOM.canvas.height * 0.75);
         DOM.ctx.closePath();
         DOM.ctx.fill();
     },
