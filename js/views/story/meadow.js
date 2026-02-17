@@ -81,6 +81,7 @@ export const Meadow = {
     drawFarHillsWithOffset(offset) {
         const worldWidth = DOM.canvas.width * 3;
         const farHills = DOM.canvas.height * 0.35;
+        const baseFreq = (Math.PI * 2) / worldWidth;
         
         const hillGrad1 = DOM.ctx.createLinearGradient(0, farHills - 50, 0, farHills + 50);
         hillGrad1.addColorStop(0, '#5D7050');
@@ -94,7 +95,7 @@ export const Meadow = {
         for (let x = 0; x <= DOM.canvas.width + step; x += step) {
             const worldX = x + offset;
             const wrappedWorldX = this.wrapX(worldX, worldWidth);
-            const y = farHills + Math.sin(wrappedWorldX * 0.008) * 30 + Math.sin(wrappedWorldX * 0.015) * 15;
+            const y = farHills + Math.sin(wrappedWorldX * baseFreq) * 30 + Math.sin(wrappedWorldX * baseFreq * 2) * 15;
             DOM.ctx.lineTo(x, y);
         }
         
@@ -107,6 +108,7 @@ export const Meadow = {
     drawMidHillsWithOffset(offset) {
         const worldWidth = DOM.canvas.width * 3;
         const midHills = DOM.canvas.height * 0.42;
+        const baseFreq = (Math.PI * 2) / worldWidth;
         
         const hillGrad2 = DOM.ctx.createLinearGradient(0, midHills - 40, 0, midHills + 40);
         hillGrad2.addColorStop(0, '#506048');
@@ -120,7 +122,7 @@ export const Meadow = {
         for (let x = 0; x <= DOM.canvas.width + step; x += step) {
             const worldX = x + offset;
             const wrappedWorldX = this.wrapX(worldX, worldWidth);
-            const y = midHills + Math.sin(wrappedWorldX * 0.01 + 1) * 25 + Math.sin(wrappedWorldX * 0.02) * 12;
+            const y = midHills + Math.sin(wrappedWorldX * baseFreq * 1.5 + 1) * 25 + Math.sin(wrappedWorldX * baseFreq * 3) * 12;
             DOM.ctx.lineTo(x, y);
         }
         
@@ -133,6 +135,7 @@ export const Meadow = {
     drawNearHillsWithOffset(offset) {
         const worldWidth = DOM.canvas.width * 3;
         const nearHills = DOM.canvas.height * 0.5;
+        const baseFreq = (Math.PI * 2) / worldWidth;
         
         const hillGrad3 = DOM.ctx.createLinearGradient(0, nearHills - 30, 0, nearHills + 30);
         hillGrad3.addColorStop(0, '#455040');
@@ -146,7 +149,7 @@ export const Meadow = {
         for (let x = 0; x <= DOM.canvas.width + step; x += step) {
             const worldX = x + offset;
             const wrappedWorldX = this.wrapX(worldX, worldWidth);
-            const y = nearHills + Math.sin(wrappedWorldX * 0.012 + 2) * 20 + Math.sin(wrappedWorldX * 0.025) * 10;
+            const y = nearHills + Math.sin(wrappedWorldX * baseFreq * 2 + 2) * 20 + Math.sin(wrappedWorldX * baseFreq * 4) * 10;
             DOM.ctx.lineTo(x, y);
         }
         
